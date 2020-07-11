@@ -46,7 +46,7 @@ Partitions:
 
 ## Install Docker
 
-```
+```bash
 sudo -s
 apt update
 apt-get upgrade -y
@@ -66,13 +66,13 @@ docker swarm init
 
 ## (Optional, not needed if you have a good SSH connection): Make browser-based SSH client work temporarily, without SSL
 
-```
+```bash
 docker run -t --name=gateone -p 8000:8000 dezota/gateone
 ```
 
 ## Install docker-compose
 
-```
+```bash
 sudo -s
 curl -L https://github.com/docker/compose/releases/download/1.26.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
@@ -80,7 +80,7 @@ chmod +x /usr/local/bin/docker-compose
 
 ## Create a deployment user (only needed if you deploy from Github, not if you do it locally)
 
-```
+```bash
 adduser -g docker github
 su - github
 ssh-keygen
@@ -96,7 +96,7 @@ exit
 Store the hostname, private key (id_rsa) and public key (id_rsa.pub) in Github secrets (or set through environment variables in docker-compose file).
 Example:
 
-```
+```bash
 DOCKER_SSH_HOST=mydomain.com
 DOCKER_SSH_PRIVATE_KEY=`cat id_rsa`
 DOCKER_SSH_PUBLIC_KEY=`cat id_rsa.pub`
@@ -105,7 +105,7 @@ DOCKER_SSH_PUBLIC_KEY=`cat id_rsa.pub`
 
 ## Install local-persist volume driver, and create some volumes
 
-```
+```bash
 curl -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash
 docker volume create -d local-persist -o mountpoint=/var/lib/docker-registry --name=docker-local-persist
 docker volume create -d local-persist -o mountpoint=/var/lib/droppy --name=droppy
@@ -117,39 +117,27 @@ docker volume create -d local-persist -o mountpoint=/var/lib/droppy/public/ --na
 
 ## Prepare to install Traefik
 
-```
-docker network create --driver=overlay traefik-public
-export USER=admin
-export PASSWORD=abcd
-openssl passwd -apr1 "$PASSWORD"
-```
-
 Install domain, username, hashed password, and email in Github Secrets (or set through environment variables in docker-compose file).
+For example:
 
-```
-TRAEFIK_DASHBOARD_DOMAIN
-TRAEFIK_DASHBOARD_USERNAME
-TRAEFIK_DASHBOARD_HASHED_PASSWORD
-LETSENCRYPT_EMAIL
+```bash
+TRAEFIK_DASHBOARD_DOMAIN=mydomain.com
+TRAEFIK_DASHBOARD_USERNAME=admin
+TRAEFIK_DASHBOARD_HASHED_PASSWORD=`openssl passwd -apr1 "$PASSWORD"`
+LETSENCRYPT_EMAIL=me@example.com
 ```
 
 
 ## Notes regarding Docker registry
 
 Basic authentication is handled by Traefic, not by the registry, so there is not need to configure anything here.
-Just hash the password:
-
-```
-htpasswd -Bbn myuser mypassword
-```
-
-and then store the hostname, username and hashed password in Github secrets (or set through environment variables in docker-compose file).
+Just store the hostname, username and hashed password in Github secrets (or set through environment variables in docker-compose file).
 
 **WARNING**: Hostname has to include port number!
 
 Example:
 
-```
+```bash
 REGISTRY_DOMAIN=mydomain.com:5000
 REGISTRY_USERNAME=myuser
 REGISTRY_HASHED_PASSWORD=`htpasswd -Bbn myuser mypassword`
@@ -160,7 +148,7 @@ REGISTRY_HASHED_PASSWORD=`htpasswd -Bbn myuser mypassword`
 
 Just put in Github secrets (or set through environment variables in docker-compose file). Example:
 
-```
+```bash
 KEYCLOAK_ADMIN_USERNAME=user
 KEYCLOAK_ADMIN_PASSWORD=password
 ```
@@ -183,6 +171,6 @@ Done.
 
 ## Test the registry user
 
-```
+```bash
 curl https://myuser:mypassword@$REGISTRY_DOMAIN:5000/v2/_catalog
 ```
