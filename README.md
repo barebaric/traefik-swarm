@@ -22,6 +22,16 @@ What you'll have when you are done:
 If you don't want or need any of these services, just remove them from docker-compose.yml.
 With all these services combined, I believe you are well set-up for deploying your app stack.
 
+# Getting started
+
+I actually recommend that you fork this repository, as it allows you to
+
+- Manage all input parameters (environment variables mentioned below) in Github Secrets
+- Use Github's Actions to deploy whenever you make any change. (This repository includes an auto-deployment workflow, see [deploy.yml](.github/workflows/deploy.yml)
+
+If you don't want to do that, you can also just download the docker-compose.yml file and deal with setting variables yourself.
+
+
 # Partition your storage as follows
 
 Partitions:
