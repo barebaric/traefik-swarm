@@ -49,14 +49,18 @@ Partitions:
 ```
 sudo -s
 apt update
+apt-get upgrade -y
 apt install mailutils apt-transport-https ca-certificates curl software-properties-common apache2-utils
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 apt update
 apt install docker-ce -y
-systemctl start docker
 
+# Optionally limit log size
+journalctl --vacuum-size=100M    
+
+systemctl start docker
 docker swarm init
 ```
 
@@ -74,11 +78,10 @@ curl -L https://github.com/docker/compose/releases/download/1.26.0/docker-compos
 chmod +x /usr/local/bin/docker-compose
 ```
 
-### Create docker deployment user
+## Create a deployment user (only needed if you deploy from Github, not if you do it locally)
 
 ```
-adduser github
-adduser github docker
+adduser -g docker github
 su - github
 ssh-keygen
 
@@ -163,7 +166,7 @@ KEYCLOAK_ADMIN_PASSWORD=password
 ```
 
 
-# Configure simple-mail-forwarder
+## Configure simple-mail-forwarder
 
 To enable a mail forwarder, define the following variable in Github Secrets (or set through environment variables in docker-compose file):
 
@@ -182,12 +185,4 @@ Done.
 
 ```
 curl https://myuser:mypassword@$REGISTRY_DOMAIN:5000/v2/_catalog
-```
-
-## Other stuff to do
-
-```
-apt-get update
-apt-get upgrade -y
-journalctl --vacuum-size=100M
 ```
