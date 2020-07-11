@@ -118,24 +118,35 @@ LETSENCRYPT_EMAIL
 
 ## Notes regarding Docker registry
 
+Basic authentication is handled by Traefic, not by the registry, so there is not need to configure anything here.
+Just hash the password:
+
 ```
 htpasswd -Bbn myuser mypassword
 ```
 
-Basic authentication is handled by Traefic, not by the registry, so there is not need to configure anything here.
-Just store the hostname, username and hashed password in Github secrets (or set through environment variables in docker-compose file).
+and then store the hostname, username and hashed password in Github secrets (or set through environment variables in docker-compose file).
 
 **WARNING**: Hostname has to include port number!
+
+Example:
+
+```
+DOCKER_SSH_HOST=mydomain.com:5000
+DOCKER_SSH_PRIVATE_KEY=`cat id_rsa`
+DOCKER_SSH_PUBLIC_KEY=`cat id_rsa.pub`
+```
 
 
 ## Set Keycloak admin user and password
 
-Just put in Github secrets:
+Just put in Github secrets (or set through environment variables in docker-compose file). Example:
 
 ```
-KEYCLOAK_ADMIN_USERNAME
-KEYCLOAK_ADMIN_PASSWORD
+KEYCLOAK_ADMIN_USERNAME=user
+KEYCLOAK_ADMIN_PASSWORD=password
 ```
+
 
 # Configure simple-mail-forwarder
 
