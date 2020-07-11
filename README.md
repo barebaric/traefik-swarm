@@ -1,6 +1,29 @@
-# Setting up my Swarm/Traefik server
+# Setting up a Swarm/Traefik server on Ubuntu 20.2
 
-Instructions for Ubuntu 20.2.
+I worked on optimizing these setup instructions for a long time.
+I believe this is now a quick and simple set of instructions to get your swarm up and running, including management tools.
+
+Prerequisites:
+- A VM running **Ubuntu 20.2** that is reachable using SSH.
+- At least ~30G worth of storage, though that won't get you far, i.e. you will have to prune your containers very frequently. I recommend at minimum 40G, and personally would go with at least 100G.
+
+What you'll have when you are done:
+- [Docker Swarm](https://docs.docker.com/engine/swarm/)
+- [Your own private docker registry](https://docs.docker.com/registry/)
+- [Traefik](https://github.com/containous/traefik/), including it's admin UI
+- [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
+- [Keycloak](https://github.com/keycloak/keycloak) SSO server
+- [A postfix SMTP server](https://github.com/knipknap/docker-simple-mail-forwarder) to forward emails to you
+- [GateOne](https://github.com/liftoff/GateOne), an HTTPS based SSH server
+- [Swarmpit](https://github.com/swarmpit/swarmpit) for managing your swarm and monitoring resources (using influxdb)
+- [Droppy](https://github.com/silverwind/droppy) File storage server with a web interface
+- [nginx](https://www.nginx.com/) webserver to serve public files uploaded using Droppy
+
+If you don't want or need any of these services, just remove them from docker-compose.yml.
+With all these services combined, I believe you are well set-up for deploying your app stack.
+
+# Partition your storage as follows
+
 Partitions:
 
 - At least 8G root partition
@@ -119,13 +142,13 @@ KEYCLOAK_ADMIN_PASSWORD
 To enable a mail forwarder, define the following variable in Github Secrets (or set through environment variables in docker-compose file):
 
 ```bash
-SMF_CONFIG=sam@barebaric.com:knipknap@gmail.com;sam@spiff.xyz:knipknap@gmail.com
+SMF_CONFIG=user@mydomain.com:test@gmail.com;user@mydomain2.com:test@gmail.com
 ```
 
-## Bring Traefik online
+## Bring the whole stack online
 
 Start deploy on Github.
-Or, copy the docker-compose.yml from this repository root, and install using "docker deploy" (after setting all the environment variables mentioned above).
+Or, copy the docker-compose.yml from this repository root, and install using "docker deploy" (after setting all the variables mentioned above).
 Done.
 
 
@@ -135,7 +158,7 @@ Done.
 curl https://myuser:mypassword@$REGISTRY_DOMAIN:5000/v2/_catalog
 ```
 
-## Other stuff
+## Other stuff to do
 
 ```
 apt-get update
