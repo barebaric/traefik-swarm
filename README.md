@@ -53,7 +53,7 @@ cat .ssh/authorized_keys
 exit
 ```
 
-Store the hostname, private key (id_rsa) and public key (id_rsa.pub) in Github secrets (or through environment variables in docker-compose file).
+Store the hostname, private key (id_rsa) and public key (id_rsa.pub) in Github secrets (or set through environment variables in docker-compose file).
 
 ```
 DOCKER_SSH_HOST
@@ -83,7 +83,14 @@ export PASSWORD=abcd
 openssl passwd -apr1 "$PASSWORD"
 ```
 
-Install hashed password, user and password in Github Secrets (or through environment variables in docker-compose file).
+Install domain, username, hashed password, and email in Github Secrets (or set through environment variables in docker-compose file).
+
+```
+TRAEFIK_DASHBOARD_DOMAIN
+TRAEFIK_DASHBOARD_USERNAME
+TRAEFIK_DASHBOARD_HASHED_PASSWORD
+LETSENCRYPT_EMAIL
+```
 
 
 ## Notes regarding Docker registry
@@ -93,7 +100,7 @@ htpasswd -Bbn myuser mypassword
 ```
 
 Basic authentication is handled by Traefic, not by the registry, so there is not need to configure anything here.
-Just store the hostname, username and hashed password in Github secrets (or through environment variables in docker-compose file).
+Just store the hostname, username and hashed password in Github secrets (or set through environment variables in docker-compose file).
 
 **WARNING**: Hostname has to include port number!
 
@@ -109,7 +116,7 @@ KEYCLOAK_ADMIN_PASSWORD
 
 # Configure simple-mail-forwarder
 
-To enable a mail forwarder, define the following variable in Github Secrets (or through environment variables in docker-compose file):
+To enable a mail forwarder, define the following variable in Github Secrets (or set through environment variables in docker-compose file):
 
 ```bash
 SMF_CONFIG=sam@barebaric.com:knipknap@gmail.com;sam@spiff.xyz:knipknap@gmail.com
@@ -118,7 +125,7 @@ SMF_CONFIG=sam@barebaric.com:knipknap@gmail.com;sam@spiff.xyz:knipknap@gmail.com
 ## Bring Traefik online
 
 Start deploy on Github.
-Or, cpy the docker-compose.yml from this repository root, and install using "docker deploy" (after replacing included $ variables).
+Or, copy the docker-compose.yml from this repository root, and install using "docker deploy" (after setting all the environment variables mentioned above).
 Done.
 
 
