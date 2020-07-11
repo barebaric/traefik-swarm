@@ -91,11 +91,12 @@ exit
 ```
 
 Store the hostname, private key (id_rsa) and public key (id_rsa.pub) in Github secrets (or set through environment variables in docker-compose file).
+Example:
 
 ```
-DOCKER_SSH_HOST
-DOCKER_SSH_PRIVATE_KEY
-DOCKER_SSH_PUBLIC_KEY
+DOCKER_SSH_HOST=mydomain.com
+DOCKER_SSH_PRIVATE_KEY=`cat id_rsa`
+DOCKER_SSH_PUBLIC_KEY=`cat id_rsa.pub`
 ```
 
 
@@ -146,9 +147,9 @@ and then store the hostname, username and hashed password in Github secrets (or 
 Example:
 
 ```
-DOCKER_SSH_HOST=mydomain.com:5000
-DOCKER_SSH_PRIVATE_KEY=`cat id_rsa`
-DOCKER_SSH_PUBLIC_KEY=`cat id_rsa.pub`
+REGISTRY_DOMAIN=mydomain.com:5000
+REGISTRY_USERNAME=myuser
+REGISTRY_HASHED_PASSWORD=`htpasswd -Bbn myuser mypassword`
 ```
 
 
