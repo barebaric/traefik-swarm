@@ -9,15 +9,14 @@ Prerequisites:
 
 What you'll have when you are done:
 - [Docker Swarm](https://docs.docker.com/engine/swarm/)
-- [Your own private docker registry](https://docs.docker.com/registry/)
-- [Traefik](https://github.com/containous/traefik/), including its admin UI
-- [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
-- [Keycloak](https://github.com/keycloak/keycloak) SSO server
-- [A postfix SMTP server](https://github.com/knipknap/docker-simple-mail-forwarder) to forward emails to you
-- [GateOne](https://github.com/liftoff/GateOne), an HTTPS based SSH server
-- [Swarmpit](https://github.com/swarmpit/swarmpit) for managing your swarm and monitoring resources (using influxdb)
-- [Droppy](https://github.com/silverwind/droppy) File storage server with a web interface
-- [nginx](https://www.nginx.com/) webserver to serve public files uploaded using Droppy
+- registry.yourdomain.com [Your own private docker registry](https://docs.docker.com/registry/)
+- traefik.yourdomain.com [Traefik](https://github.com/containous/traefik/), including its admin UI. [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
+- keycloak.yourdomain.com [Keycloak](https://github.com/keycloak/keycloak) SSO server
+- mail.yourdomain.com [A postfix SMTP server](https://github.com/knipknap/docker-simple-mail-forwarder) to forward emails to you
+- gateone.yourdomain.com [GateOne](https://github.com/liftoff/GateOne), an HTTPS based SSH server
+- swarmpit.yourdomain.com [Swarmpit](https://github.com/swarmpit/swarmpit) for managing your swarm and monitoring resources (using influxdb)
+- droppy.yourdomain.com [Droppy](https://github.com/silverwind/droppy) File storage server with a web interface
+- yourdomain.com [nginx](https://www.nginx.com/) webserver to serve public files uploaded using Droppy
 
 If you don't want or need any of these services, just remove them from docker-compose.yml.
 With all these services combined, I believe you are well set-up for deploying your app stack.
