@@ -17,10 +17,10 @@ What you'll have when you are done:
 | - | [Docker Swarm](https://docs.docker.com/engine/swarm/) | The core swarm
 | registry.yourdomain.com | [Your own private docker registry](https://docs.docker.com/registry/) | Needed to deploy things to your swarm
 | traefik.yourdomain.com | [Traefik](https://github.com/containous/traefik/) | The automatic reverse proxy, including its admin UI. [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
+| swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
 | keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
 | mail.yourdomain.com | [Postfix](https://github.com/knipknap/docker-simple-mail-forwarder) | A SMTP server to forward emails to you
-| gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH server
-| swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
+| gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
 | droppy.yourdomain.com | [Droppy](https://github.com/silverwind/droppy) | File storage server with a web interface
 | yourdomain.com | [nginx](https://www.nginx.com/) | Webserver to serve public files uploaded using Droppy
 
