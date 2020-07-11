@@ -36,8 +36,7 @@ I actually recommend that you fork this repository, as it allows you to
 
 If you don't want to do that, you can also just download the docker-compose.yml file and deal with setting variables yourself.
 
-
-# Partition your storage as follows
+## Partition your storage as follows
 
 Partitions:
 
