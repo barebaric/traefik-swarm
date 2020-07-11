@@ -58,7 +58,7 @@ services:
       - --certificatesresolvers.le.acme.httpchallenge=true
       - --certificatesresolvers.le.acme.httpchallenge.entrypoint=http
       - --certificatesresolvers.le.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
+      - --certificatesresolvers.le.acme.email=${LETSENCRYPT_EMAIL?Variable not set}
       # Store the Let's Encrypt certificates in the mounted volume
       - --certificatesresolvers.le.acme.storage=/certificates/acme.json
       # Enable the access log, with HTTP requests
@@ -151,10 +151,7 @@ services:
         - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
     environment:
       - SMF_DOMAIN=${DOMAIN?Variable not set}
-      - |
-        SMF_CONFIG=
-        sam@${DOMAIN?Variable not set}:knipknap@gmail.com;
-        sam@spiff.xyz:knipknap@gmail.com;
+      - SMF_CONFIG=${SMF_CONFIG?Variable not set}
       - SMF_POSTFIX_myhostname=smtp.${DOMAIN?Variable not set}
       #- SMF_POSTFIX_relay_domains="${DOMAIN?Variable not set} spiff.xyz"
       - SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
