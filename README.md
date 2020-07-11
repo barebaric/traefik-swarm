@@ -4,7 +4,7 @@ I worked on optimizing these setup instructions for a long time.
 I believe this is now a quick and simple set of instructions to get your swarm up and running, including management tools.
 
 Prerequisites:
-- A VM running **Ubuntu 20.2** that is reachable using SSH.
+- A VM or server running **Ubuntu 20.2** that is reachable using SSH.
 - At least ~30G worth of storage, though that won't get you far, i.e. you will have to prune your containers very frequently. I recommend at minimum 40G, and personally would go with at least 100G.
 
 What you'll have when you are done:
