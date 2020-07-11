@@ -10,7 +10,7 @@ Prerequisites:
 What you'll have when you are done:
 - [Docker Swarm](https://docs.docker.com/engine/swarm/)
 - [Your own private docker registry](https://docs.docker.com/registry/)
-- [Traefik](https://github.com/containous/traefik/), including it's admin UI
+- [Traefik](https://github.com/containous/traefik/), including its admin UI
 - [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
 - [Keycloak](https://github.com/keycloak/keycloak) SSO server
 - [A postfix SMTP server](https://github.com/knipknap/docker-simple-mail-forwarder) to forward emails to you
