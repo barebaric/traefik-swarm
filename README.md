@@ -47,11 +47,20 @@ ssh-keygen
 
 mv .ssh/id_rsa.pub .ssh/authorized_keys
 cat .ssh/id_rsa
+rm .ssh/id_rsa
 cat .ssh/authorized_keys
 
-# User und keys bei Github eintragen
 exit
 ```
+
+Store the hostname, private key (id_rsa) and public key (id_rsa.pub) in Github secrets (or through environment variables in docker-compose file).
+
+```
+DOCKER_SSH_HOST
+DOCKER_SSH_PRIVATE_KEY
+DOCKER_SSH_PUBLIC_KEY
+```
+
 
 ## Install local-persist volume driver, and create some volumes
 
@@ -74,7 +83,7 @@ export PASSWORD=abcd
 openssl passwd -apr1 "$PASSWORD"
 ```
 
-Install hashed password, user and password in Github Secrets (or replace in docker-compose file).
+Install hashed password, user and password in Github Secrets (or through environment variables in docker-compose file).
 
 
 ## Notes regarding Docker registry
@@ -84,9 +93,8 @@ htpasswd -Bbn myuser mypassword
 ```
 
 Basic authentication is handled by Traefic, not by the registry, so there is not need to configure anything here.
-Just store the user and password in Github secrets.
+Just store the hostname, username and hashed password in Github secrets (or through environment variables in docker-compose file).
 
-Enter hostname, username and hashed password in Github Secrets
 **WARNING**: Hostname has to include port number!
 
 
@@ -99,6 +107,13 @@ KEYCLOAK_ADMIN_USERNAME
 KEYCLOAK_ADMIN_PASSWORD
 ```
 
+# Configure simple-mail-forwarder
+
+To enable a mail forwarder, define the following variable in Github Secrets (or through environment variables in docker-compose file):
+
+```bash
+SMF_CONFIG=sam@barebaric.com:knipknap@gmail.com;sam@spiff.xyz:knipknap@gmail.com
+```
 
 ## Bring Traefik online
 
