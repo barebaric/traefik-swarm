@@ -15,7 +15,7 @@ What you'll have when you are done:
 | Default Endpoint | Product | Description
 |----------|---------|-------------
 | - | [Docker Swarm](https://docs.docker.com/engine/swarm/) | The core swarm
-| registry.yourdomain.com | [Your own private docker registry](https://docs.docker.com/registry/) | Needed to deploy things to your swarm
+| registry.yourdomain.com | [Docker Registry](https://docs.docker.com/registry/) | Your own private docker registry. Needed to deploy your own containers to your swarm
 | traefik.yourdomain.com | [Traefik](https://github.com/containous/traefik/) | The automatic reverse proxy, including its admin UI. [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
 | swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
 | keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
