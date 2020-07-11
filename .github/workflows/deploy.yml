@@ -23,12 +23,13 @@ jobs:
         envkey_TRAEFIK_DASHBOARD_DOMAIN: ${{ secrets.TRAEFIK_DASHBOARD_DOMAIN }}
         envkey_TRAEFIK_DASHBOARD_USERNAME: ${{ secrets.TRAEFIK_DASHBOARD_USERNAME }}
         envkey_TRAEFIK_DASHBOARD_HASHED_PASSWORD: ${{ secrets.TRAEFIK_DASHBOARD_HASHED_PASSWORD }}
-        envkey_KEYCLOAK_ADMIN_USERNAME: ${{ secrets.KEYCLOAK_ADMIN_USERNAME }}
-        envkey_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+        envkey_LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
         envkey_REGISTRY_DOMAIN: ${{ secrets.REGISTRY_DOMAIN }}
         envkey_REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
         envkey_REGISTRY_HASHED_PASSWORD: ${{ secrets.REGISTRY_HASHED_PASSWORD }}
-        envkey_EMAIL: knipknap@gmail.com
+        envkey_SMF_CONFIG: ${{ secrets.SMF_CONFIG }}
+        envkey_KEYCLOAK_ADMIN_USERNAME: ${{ secrets.KEYCLOAK_ADMIN_USERNAME }}
+        envkey_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
         file_name: .env
 
     - name: Deploy to Docker swarm
