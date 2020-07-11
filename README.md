@@ -61,8 +61,30 @@ apt install docker-ce -y
 journalctl --vacuum-size=100M    
 
 systemctl start docker
+```
+
+And on the master node:
+
+```bash
 docker swarm init
 ```
+
+## Join worker nodes (optional)
+
+On the worker nodes, install Docker as above, but then execute the following commands once per worker.
+
+On master:
+
+```bash
+docker swarm join-token worker
+```
+
+Copy the result to the worker node, for example:
+
+```bash
+docker swarm join --token SWMTKN-1-sdrgddrg0988sr9sdgrddafvsefsgsg098drgrag-wfdr098drgrd8g 172.173.174.175:2377
+```
+
 
 ## (Optional, not needed if you have a good SSH connection): Make browser-based SSH client work temporarily, without SSL
 
