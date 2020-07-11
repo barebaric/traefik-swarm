@@ -1,0 +1,42 @@
+name: Deploy to production swarm
+
+on:
+  push:
+    branches:
+      - master
+  release:
+    types: [created]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout master
+      uses: actions/checkout@v2
+      
+    - name: Make envfile for Traefik
+      uses: knipknap/create-envfile@master
+      with:
+        envkey_TAG: ${{ github.sha }}
+        envkey_DOMAIN: ${{ secrets.DOMAIN }}
+        envkey_TRAEFIK_DASHBOARD_DOMAIN: ${{ secrets.TRAEFIK_DASHBOARD_DOMAIN }}
+        envkey_TRAEFIK_DASHBOARD_USERNAME: ${{ secrets.TRAEFIK_DASHBOARD_USERNAME }}
+        envkey_TRAEFIK_DASHBOARD_HASHED_PASSWORD: ${{ secrets.TRAEFIK_DASHBOARD_HASHED_PASSWORD }}
+        envkey_REGISTRY_DOMAIN: ${{ secrets.REGISTRY_DOMAIN }}
+        envkey_REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        envkey_REGISTRY_HASHED_PASSWORD: ${{ secrets.REGISTRY_HASHED_PASSWORD }}
+        envkey_EMAIL: knipknap@gmail.com
+        file_name: .env
+
+    - name: Deploy to Docker swarm
+      uses: knipknap/docker-swarm-deployment-action@master
+      with:
+        remote_docker_host: ${{ secrets.DOCKER_SSH_HOST }}
+        ssh_private_key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        ssh_public_key: ${{ secrets.DOCKER_SSH_PUBLIC_KEY }}
+        deploy_path: /home/github/deployment/myswarm
+        stack_file_name: docker-compose.yml
+        env_file_name: .env
+        keep_files: 5
+        args: myswarm

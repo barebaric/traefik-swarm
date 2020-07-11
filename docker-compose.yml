@@ -1,0 +1,360 @@
+version: "3.8"
+services:
+  traefik:
+    # Use the latest Traefik image
+    image: traefik:2.2.2
+    ports:
+      - 25:25
+      - 80:80
+      - 443:443
+      - 5000:5000
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the manager node,
+          # as the node with it has the volume for the certificates
+          - node.role == manager
+          #- node.labels.traefik-public.traefik-public-certificates == true
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        # Middlewares can be re-used by other stacks in other Docker Compose files
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+        - traefik.http.middlewares.https5000-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https5000-redirect.redirectscheme.port=5000
+        - traefik.http.middlewares.https5000-redirect.redirectscheme.permanent=true
+        - traefik.http.middlewares.admin-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERNAME?Variable not set}:${TRAEFIK_DASHBOARD_HASHED_PASSWORD?Variable not set}
+        # Use the special Traefik service api@internal with the web UI/Dashboard
+        - traefik.http.routers.traefik-dashboard-http.rule=Host(`${TRAEFIK_DASHBOARD_DOMAIN?Variable not set}`)
+        - traefik.http.routers.traefik-dashboard-http.entrypoints=http
+        - traefik.http.routers.traefik-dashboard-http.middlewares=https-redirect
+        - traefik.http.routers.traefik-dashboard-https.rule=Host(`${TRAEFIK_DASHBOARD_DOMAIN?Variable not set}`)
+        - traefik.http.routers.traefik-dashboard-https.entrypoints=https
+        - traefik.http.routers.traefik-dashboard-https.tls=true
+        - traefik.http.routers.traefik-dashboard-https.tls.certresolver=le
+        - traefik.http.routers.traefik-dashboard-https.service=api@internal
+        - traefik.http.routers.traefik-dashboard-https.middlewares=admin-auth
+        - traefik.http.services.traefik-dashboard-https.loadbalancer.server.port=8080
+    volumes:
+      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the volume to store the certificates
+      - traefik-public-certificates:/certificates
+    command:
+      # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
+      - --log.level=DEBUG
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+      # Do not expose all Docker services, only the ones explicitly exposed
+      # Enable Docker Swarm mode
+      - --entrypoints.smtp.address=:25
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --entrypoints.https5000.address=:5000
+      - --providers.docker
+      - --providers.docker.swarmmode
+      - --providers.docker.exposedbydefault=false
+      - --certificatesresolvers.le.acme.httpchallenge=true
+      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.le.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
+      # Store the Let's Encrypt certificates in the mounted volume
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      # Enable the access log, with HTTP requests
+      - --accesslog
+      # Enable the Traefik log, for configurations and errors
+      - --log
+      # Enable the Dashboard and API
+      - --api
+      # Allow to communicate with backend containers running https. https://stackoverflow.com/questions/49412376/internal-server-error-with-traefik-https-backend-on-port-443
+      - --serverstransport.insecureskipverify=true
+    networks:
+      - traefik-public
+      - default
+
+  registry:
+    restart: always
+    image: registry:2
+    volumes:
+      - docker-registry:/var/lib/registry
+    deploy:
+      mode: 'global'
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME?Variable not set}:${REGISTRY_HASHED_PASSWORD?Variable not set}
+        - traefik.http.routers.registry-http.rule=Host(`${REGISTRY_DOMAIN?Variable not set}`)
+        - traefik.http.routers.registry-http.entrypoints=http
+        - traefik.http.routers.registry-http.middlewares=https5000-redirect
+        - traefik.http.routers.registry-https.rule=Host(`${REGISTRY_DOMAIN?Variable not set}`)
+        - traefik.http.routers.registry-https.entrypoints=https5000
+        - traefik.http.routers.registry-https.tls=true
+        - traefik.http.routers.registry-https.tls.certresolver=le
+        - traefik.http.routers.registry-https.middlewares=registry-auth
+        - traefik.http.services.registry.loadbalancer.server.port=5000
+
+  welcome:
+    image: nginx:latest
+    volumes:
+      - droppy-public:/usr/share/nginx/html:ro
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.traefik-public-http.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.traefik-public-http.entrypoints=http
+        - traefik.http.routers.traefik-public-http.middlewares=https-redirect
+        - traefik.http.routers.traefik-public-https.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.traefik-public-https.entrypoints=https
+        - traefik.http.routers.traefik-public-https.tls=true
+        - traefik.http.routers.traefik-public-https.tls.certresolver=le
+        - traefik.http.services.traefik-public.loadbalancer.server.port=80
+    networks:
+      - traefik-public
+
+  gateone:
+    image: dezota/gateone
+    networks:
+      - traefik-public
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.gateone-http.rule=Host(`shell.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.gateone-http.entrypoints=http
+        - traefik.http.routers.gateone-http.middlewares=https-redirect
+        - traefik.http.routers.gateone-https.rule=Host(`shell.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.gateone-https.entrypoints=https
+        - traefik.http.routers.gateone-https.tls=true
+        - traefik.http.routers.gateone-https.tls.certresolver=le
+        - traefik.http.routers.gateone-https.middlewares=admin-auth
+        - traefik.http.services.gateone.loadbalancer.server.port=8000
+        - traefik.http.services.gateone.loadbalancer.server.scheme=https
+
+  mail_relay:
+    image: knipknap/docker-simple-mail-forwarder:latest
+    networks:
+      - traefik-public
+      - default
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
+        - traefik.tcp.routers.mail_relay.entrypoints=smtp
+        - traefik.tcp.routers.mail_relay.service=mail_relay
+        - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
+    environment:
+      - SMF_DOMAIN=${DOMAIN?Variable not set}
+      - |
+        SMF_CONFIG=
+        sam@${DOMAIN?Variable not set}:knipknap@gmail.com;
+        sam@spiff.xyz:knipknap@gmail.com;
+      - SMF_POSTFIX_myhostname=smtp.${DOMAIN?Variable not set}
+      #- SMF_POSTFIX_relay_domains="${DOMAIN?Variable not set} spiff.xyz"
+      - SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
+      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
+
+  swarmpit:
+    image: swarmpit/swarmpit:latest
+    environment:
+      - SWARMPIT_DB=http://db:5984
+      - SWARMPIT_INFLUXDB=http://influxdb:8086
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - net
+      - traefik-public
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.swarmpit-http.rule=Host(`swarmpit.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.swarmpit-http.entrypoints=http
+        - traefik.http.routers.swarmpit-http.middlewares=https-redirect
+        - traefik.http.routers.swarmpit-https.rule=Host(`swarmpit.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.swarmpit-https.entrypoints=https
+        - traefik.http.routers.swarmpit-https.tls=true
+        - traefik.http.routers.swarmpit-https.tls.certresolver=le
+        - traefik.http.services.swarmpit.loadbalancer.server.port=8080
+
+  db:
+    image: couchdb:2.3.0
+    volumes:
+      - db-data:/opt/couchdb/data
+    networks:
+      - net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.30'
+          memory: 512M
+        reservations:
+          cpus: '0.15'
+          memory: 256M
+      placement:
+        constraints:
+          - node.role == manager
+
+  influxdb:
+    image: influxdb:1.7
+    volumes:
+      - influx-data:/var/lib/influxdb
+    networks:
+      - net
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
+          memory: 128M
+        limits:
+          cpus: '0.6'
+          memory: 512M
+      placement:
+        constraints:
+          - node.role == manager
+
+  agent:
+    image: swarmpit/agent:latest
+    environment:
+      - DOCKER_API_VERSION=1.35
+      - EVENT_ENDPOINT=http://swarmpit:8080/events
+      - HEALTH_CHECK_ENDPOINT=http://swarmpit:8080/version
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - net
+    deploy:
+      mode: global
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 64M
+        reservations:
+          cpus: '0.05'
+          memory: 32M
+
+  droppy:
+    image: silverwind/droppy
+    volumes:
+      - droppy:/files
+    restart: unless-stopped
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.droppy-http.rule=Host(`droppy.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.droppy-http.entrypoints=http
+        - traefik.http.routers.droppy-http.middlewares=https-redirect
+        - traefik.http.routers.droppy-https.rule=Host(`droppy.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.droppy-https.entrypoints=https
+        - traefik.http.routers.droppy-https.tls=true
+        - traefik.http.routers.droppy-https.tls.certresolver=le
+        - traefik.http.services.droppy.loadbalancer.server.port=8989
+
+  sso-mysql:
+    image: mysql:5.7
+    volumes:
+      - sso-mysql-data:/var/lib/mysql
+    networks:
+      - sso
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: keycloak-db-password
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      - DB_VENDOR=MYSQL
+      - DB_ADDR=sso-mysql
+      - DB_PORT=3306
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=keycloak-db-password
+      - KEYCLOAK_USER=${KEYCLOAK_ADMIN_USERNAME?Variable not set}
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD?Variable not set}
+      - PROXY_ADDRESS_FORWARDING=true
+      - KEYCLOAK_HOSTNAME=sso.${DOMAIN?Variable not set}
+    networks:
+      - sso
+      - traefik-public
+    depends_on:
+      - sso-mysql
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.keycloak-http.rule=Host(`sso.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.keycloak-http.entrypoints=http
+        - traefik.http.routers.keycloak-http.middlewares=https-redirect
+        - traefik.http.routers.keycloak-https.rule=Host(`sso.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.keycloak-https.entrypoints=https
+        - traefik.http.routers.keycloak-https.tls=true
+        - traefik.http.routers.keycloak-https.tls.certresolver=le
+        - traefik.http.services.keycloak.loadbalancer.server.port=8080
+
+volumes:
+  db-data:
+    driver: local
+
+  influx-data:
+    driver: local
+
+  # Create a volume to store the certificates. Make sure there is a constraint to have
+  # Traefik always deployed to the same Docker node with the same volume containing
+  # the HTTPS certificates. (by default this is done my constraining Traefik to the
+  # manager node, see above.
+  traefik-public-certificates:
+    driver: local
+
+  docker-registry:
+    external: true
+
+  droppy:
+    external: true
+
+  droppy-public:
+    external: true
+
+  sso-mysql-data:
+    driver: local
+
+networks:
+  # Use the previously created public network "traefik-public", shared with other
+  # services that need to be publicly available via this Traefik
+  traefik-public:
+    external: true
+
+  net:
+    driver: overlay
+    attachable: true
+
+  sso:
+    driver: overlay
+    attachable: true
