@@ -15,14 +15,14 @@ What you'll have when you are done:
 | Default Endpoint | Product | Description
 |----------|---------|-------------
 | - | [Docker Swarm](https://docs.docker.com/engine/swarm/) | The core swarm
-| https://registry.yourdomain.com:5000 | [Docker Registry](https://docs.docker.com/registry/) | Your own private docker registry. Needed to deploy your own containers to your swarm
-| https://traefik.yourdomain.com | [Traefik](https://github.com/containous/traefik/) | The automatic reverse proxy, including its admin UI. [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
-| https://swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
-| https://keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
-| https://mail.yourdomain.com | [Postfix](https://github.com/knipknap/docker-simple-mail-forwarder) | A SMTP server to forward emails to you
-| https://gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
-| https://droppy.yourdomain.com | [Droppy](https://github.com/silverwind/droppy) | File storage server with a web interface
-| https://yourdomain.com | [nginx](https://www.nginx.com/) | Webserver to serve public files uploaded using Droppy
+| https://&#8203;registry.yourdomain.com:5000 | [Docker Registry](https://docs.docker.com/registry/) | Your own private docker registry. Needed to deploy your own containers to your swarm
+| https://&#8203;traefik.yourdomain.com | [Traefik](https://github.com/containous/traefik/) | The automatic reverse proxy, including its admin UI. [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
+| https://&#8203;swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
+| https://&#8203;keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
+| https://&#8203;mail.yourdomain.com | [Postfix](https://github.com/knipknap/docker-simple-mail-forwarder) | A SMTP server to forward emails to you
+| https://&#8203;gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
+| https://&#8203;droppy.yourdomain.com | [Droppy](https://github.com/silverwind/droppy) | File storage server with a web interface
+| https://&#8203;yourdomain.com | [nginx](https://www.nginx.com/) | Webserver to serve public files uploaded using Droppy
 
 If you don't want or need any of these services, just remove them from docker-compose.yml.
 With all these services combined, I believe you are well set-up for deploying your app stack.
