@@ -136,8 +136,8 @@ services:
     #    - traefik.tcp.routers.mail_relay.service=mail_relay
     #    - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
     environment:
-      - SMF_DOMAIN=${DOMAIN?Variable not set}
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
+      #- SMF_DOMAIN=${DOMAIN?Variable not set}
       #- SMF_POSTFIX_myhostname=${DOMAIN?Variable not set}
       #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
       #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
