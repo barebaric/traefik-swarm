@@ -121,7 +121,7 @@ services:
       - traefik-public
       - default
     # Couldn't make postfix work through Traefik so far - "Relay access denied"
-    #deploy:
+    deploy:
     #  labels:
     #    - traefik.enable=true
     #    - traefik.docker.network=traefik-public
