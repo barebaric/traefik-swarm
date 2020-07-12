@@ -122,19 +122,19 @@ services:
       - default
     deploy:
       labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
-        - traefik.tcp.routers.mail_relay.entrypoints=smtp
-        - traefik.tcp.routers.mail_relay.service=mail_relay
-        - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
+        #- traefik.enable=true
+        #- traefik.docker.network=traefik-public
+        #- traefik.constraint-label=traefik-public
+        #- traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
+        #- traefik.tcp.routers.mail_relay.entrypoints=smtp
+        #- traefik.tcp.routers.mail_relay.service=mail_relay
+        #- traefik.tcp.services.mail_relay.loadbalancer.server.port=25
     environment:
       - SMF_DOMAIN=${DOMAIN?Variable not set}
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
       - SMF_POSTFIX_myhostname=${DOMAIN?Variable not set}
       #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
-      - SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
+      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
 
   swarmpit:
     image: swarmpit/swarmpit:latest
