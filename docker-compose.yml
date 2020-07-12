@@ -4,7 +4,7 @@ services:
     # Use the latest Traefik image
     image: traefik:2.2.2
     ports:
-      - 25:25
+      #- 25:25
       - 80:80
       - 443:443
       - 5000:5000
@@ -122,6 +122,7 @@ services:
       - default
     deploy:
       labels:
+        # Couldn't make postfix work through Traefik so far - "Relay access denied"
         #- traefik.enable=true
         #- traefik.docker.network=traefik-public
         #- traefik.constraint-label=traefik-public
