@@ -19,7 +19,7 @@ What you'll have when you are done:
 | https://&#8203;traefik.yourdomain.com | [Traefik](https://github.com/containous/traefik/) | The automatic reverse proxy, including its admin UI. [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
 | https://&#8203;swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
 | https://&#8203;keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
-| https://&#8203;mail.yourdomain.com | [Postfix](https://github.com/knipknap/docker-simple-mail-forwarder) | A SMTP server to forward emails to you
+| https://&#8203;yourdomain.com:25 | [Postfix](https://github.com/knipknap/docker-simple-mail-forwarder) | A SMTP server to forward emails to you
 | https://&#8203;gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
 | https://&#8203;droppy.yourdomain.com | [Droppy](https://github.com/silverwind/droppy) | File storage server with a web interface
 | https://&#8203;yourdomain.com | [nginx](https://www.nginx.com/) | Webserver to serve public files uploaded using Droppy
