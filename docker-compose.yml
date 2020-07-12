@@ -120,6 +120,8 @@ services:
     networks:
       - traefik-public
       - default
+    ports:
+      - 25:25
     # Couldn't make postfix work through Traefik so far - "Relay access denied"
     deploy:
     #  labels:
