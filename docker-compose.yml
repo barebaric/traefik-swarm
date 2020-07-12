@@ -132,10 +132,10 @@ services:
     environment:
       - SMF_DOMAIN=${DOMAIN?Variable not set}
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
-      - SMF_POSTFIX_myhostname=smtp.${DOMAIN?Variable not set}
-      #- SMF_POSTFIX_relay_domains="${DOMAIN?Variable not set} spiff.xyz"
-      - SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
-      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
+      #- SMF_POSTFIX_myhostname=smtp.${DOMAIN?Variable not set}
+      - SMF_POSTFIX_relay_domains="${DOMAIN?Variable not set}"
+      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
+      - SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
 
   swarmpit:
     image: swarmpit/swarmpit:latest
