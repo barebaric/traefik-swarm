@@ -132,7 +132,7 @@ services:
     environment:
       - SMF_DOMAIN=${DOMAIN?Variable not set}
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
-      #- SMF_POSTFIX_myhostname=smtp.${DOMAIN?Variable not set}
+      - SMF_POSTFIX_myhostname=${DOMAIN?Variable not set}
       - SMF_POSTFIX_relay_domains="${DOMAIN?Variable not set}"
       #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
       - SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
