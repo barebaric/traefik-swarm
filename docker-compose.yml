@@ -8,6 +8,7 @@ services:
       - "80:80"
       - "443:443"
       - "5000:5000"
+      - "8181:8181"
     deploy:
       placement:
         constraints:
@@ -52,6 +53,7 @@ services:
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
       - --entrypoints.https5000.address=:5000
+      - --entrypoints.grpc.address=:8181
       - --providers.docker
       - --providers.docker.swarmmode
       - --providers.docker.exposedbydefault=false
