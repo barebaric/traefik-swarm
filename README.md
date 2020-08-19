@@ -40,7 +40,7 @@ If you don't want to do that, you can also just download the docker-compose.yml 
 
 Partitions:
 
-- At least 8G root partition
+- At least 15G root partition
 - At least 5G /var/log
 - Rest /var/lib
 
