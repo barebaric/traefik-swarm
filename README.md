@@ -1,4 +1,5 @@
 # Setting up a Swarm/Traefik server on Ubuntu 20.04 LTS
+## Note: I am trying this on Ubuntu 18.04 LTS ##
 
 I worked on optimizing these setup instructions for a long time.
 I believe this is now a quick and simple set of instructions to get your swarm up and running, including management tools.
