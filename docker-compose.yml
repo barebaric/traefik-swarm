@@ -197,7 +197,7 @@ services:
           - node.role == manager
 
   influxdb:
-    image: influxdb:2.6
+    image: influxdb:1.8
     volumes:
       - influx-data:/var/lib/influxdb
     networks:
@@ -226,6 +226,8 @@ services:
       - net
     deploy:
       mode: global
+      labels:
+        swarmpit.agent: 'true'
       resources:
         limits:
           cpus: '0.10'
