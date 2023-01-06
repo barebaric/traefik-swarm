@@ -197,7 +197,7 @@ services:
           - node.role == manager
 
   influxdb:
-    image: influxdb:1.7
+    image: influxdb:2.6
     volumes:
       - influx-data:/var/lib/influxdb
     networks:
