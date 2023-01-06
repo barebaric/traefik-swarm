@@ -117,13 +117,23 @@ services:
         - traefik.http.services.gateone.loadbalancer.server.port=8000
         - traefik.http.services.gateone.loadbalancer.server.scheme=https
 
+version: '3'
+services:
   mail_relay:
-    image: knipknap/docker-simple-mail-forwarder:latest
+    image: catatnight/postfix:latest
+    environment:
+      - SMTP_USER=${POSTFIX_SMTP_USER?Variable not set}:${POSTFIX_SMTP_PASSWORD?Variable not set}
+      - POSTFIX_RELAYHOST=smtp.gmail.com:587
+      - POSTFIX_VIRTUAL_ALIAS_MAPS=${POSTFIX_VIRTUAL_ALIAS_MAPS?Variable not set}
+      - ENABLE_SPAMASSASSIN=1
+      - ENABLE_CLAMAV=1
+      - ENABLE_FAIL2BAN=1
+      - ENABLE_POSTGREY=1
+    ports:
+      - "587:587"
     networks:
       - traefik-public
       - default
-    ports:
-      - "25:25"
     deploy:
       placement:
         constraints:
@@ -137,12 +147,6 @@ services:
     #    - traefik.tcp.routers.mail_relay.entrypoints=smtp
     #    - traefik.tcp.routers.mail_relay.service=mail_relay
     #    - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
-    environment:
-      - SMF_CONFIG=${SMF_CONFIG?Variable not set}
-      #- SMF_DOMAIN=${DOMAIN?Variable not set}
-      #- SMF_POSTFIX_myhostname=${DOMAIN?Variable not set}
-      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
-      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
 
   swarmpit:
     image: swarmpit/swarmpit:latest
