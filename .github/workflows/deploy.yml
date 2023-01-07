@@ -29,9 +29,9 @@ jobs:
         envkey_REGISTRY_DOMAIN: ${{ secrets.REGISTRY_DOMAIN }}
         envkey_REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
         envkey_REGISTRY_HASHED_PASSWORD: ${{ secrets.REGISTRY_HASHED_PASSWORD }}
-        envkey_POSTFIX_SMTP_USER: ${{ secrets.SMF_CONFIG }}
-        envkey_POSTFIX_SMTP_PASSWORD: ${{ secrets.SMF_CONFIG }}
-        envkey_POSTFIX_VIRTUAL_ALIAS_MAPS: ${{ secrets.SMF_CONFIG }}
+        envkey_POSTFIX_SMTP_USER: ${{ secrets.POSTFIX_SMTP_USER }}
+        envkey_POSTFIX_SMTP_PASSWORD: ${{ secrets.POSTFIX_SMTP_PASSWORD }}
+        envkey_POSTFIX_VIRTUAL_ALIAS_MAPS: ${{ secrets.POSTFIX_VIRTUAL_ALIAS_MAPS }}
         envkey_SMF_CONFIG: ${{ secrets.SMF_CONFIG }}
         envkey_KEYCLOAK_ADMIN_USERNAME: ${{ secrets.KEYCLOAK_ADMIN_USERNAME }}
         envkey_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
