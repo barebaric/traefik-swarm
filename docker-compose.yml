@@ -73,7 +73,6 @@ services:
       - --serverstransport.insecureskipverify=true
     networks:
       - traefik-public
-      - mail
       - default
 
   registry:
@@ -121,15 +120,15 @@ services:
   mail_relay:
     image: catatnight/postfix:latest
     networks:
-      - mail
+      - traefik-public
     deploy:
       placement:
         constraints:
           - node.role == manager
       labels:
         - traefik.enable=true
-        - traefik.docker.network=mail
-        - traefik.constraint-label=mail
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
     # Couldn't make postfix work through Traefik so far - "Relay access denied"
         - traefik.tcp.routers.mail_relay.rule=HostSNI(`${DOMAIN?Variable not set}`)
     #    - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
@@ -365,10 +364,6 @@ networks:
     external: true
 
   net:
-    driver: overlay
-    attachable: true
-
-  mail:
     driver: overlay
     attachable: true
 
