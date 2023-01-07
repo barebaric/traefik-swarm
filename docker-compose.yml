@@ -120,6 +120,8 @@ services:
   mail_relay:
     image: catatnight/postfix:latest
     ports:
+      - "25:25"
+      - "465:465"
       - "587:587"
     networks:
       - traefik-public
@@ -145,6 +147,11 @@ services:
       - ENABLE_CLAMAV=1
       - ENABLE_FAIL2BAN=1
       - ENABLE_POSTGREY=1
+      - POSTFIX_MYHOSTNAME=${DOMAIN?Variable not set}
+      - POSTFIX_POSTMASTER=${LETSENCRYPT_EMAIL?Variable not set}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL?Variable not set}
+      - LETSENCRYPT_HOST=${DOMAIN?Variable not set}
+      - LETSENCRYPT_TEST=true
 
   swarmpit:
     image: swarmpit/swarmpit:latest
