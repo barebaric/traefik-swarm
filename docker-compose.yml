@@ -139,6 +139,7 @@ services:
     #    - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
     environment:
       - POSTFIX_RELAYHOST=smtp.gmail.com:587
+      - SMTP_USER=${POSTFIX_SMTP_USER?Variable not set}:${POSTFIX_SMTP_PASSWORD?Variable not set}
       - POSTFIX_VIRTUAL_ALIAS_MAPS=${POSTFIX_VIRTUAL_ALIAS_MAPS?Variable not set}
       - ENABLE_SPAMASSASSIN=1
       - ENABLE_CLAMAV=1
