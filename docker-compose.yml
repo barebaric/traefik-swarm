@@ -124,16 +124,20 @@ services:
       - "465:465"
       - "587:587"
     networks:
-      - traefik-public
+      - net
       - default
     deploy:
       placement:
         constraints:
           - node.role == manager
       labels:
-        - traefik.enable=false
+        - traefik.enable=true
     # Couldn't make postfix work through Traefik so far - "Relay access denied"
-    #    - traefik.docker.network=traefik-public
+        - traefik.docker.network=traefik-public
+        - traefik.tcp.routers.postfix-smtp.rule=HostSNI(`${DOMAIN?Variable not set}`)
+        - traefik.tcp.routers.postfix-smtp.entrypoints=smtp
+        - traefik.tcp.routers.postfix-smtp.service=postfix
+        - traefik.tcp.services.postfix.loadbalancer.server.port=25
     #    - traefik.constraint-label=traefik-public
     #    - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
     #    - traefik.tcp.routers.mail_relay.entrypoints=smtp
