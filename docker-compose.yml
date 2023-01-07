@@ -126,6 +126,7 @@ services:
     networks:
       - net
       - default
+      - traefik-public
     deploy:
       placement:
         constraints:
