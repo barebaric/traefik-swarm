@@ -122,6 +122,8 @@ services:
     image: catatnight/postfix:latest
     networks:
       - traefik-public
+    ports:
+      - 587
     deploy:
       placement:
         constraints:
