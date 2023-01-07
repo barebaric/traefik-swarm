@@ -48,12 +48,12 @@ services:
       - --log.level=DEBUG
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
-      # Enable Docker Swarm mode
       - --entrypoints.smtp.address=:25
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
       - --entrypoints.https5000.address=:5000
       - --entrypoints.grpc.address=:8181
+      # Enable Docker Swarm mode
       - --providers.docker
       - --providers.docker.swarmmode
       - --providers.docker.exposedbydefault=false
@@ -128,9 +128,9 @@ services:
           - node.role == manager
       labels:
         - traefik.enable=true
-        - traefik.constraint-label=traefik-public
+        - traefik.docker.network=mail
+        - traefik.constraint-label=mail
     # Couldn't make postfix work through Traefik so far - "Relay access denied"
-        - traefik.docker.network=traefik-public
         - traefik.tcp.routers.mail_relay.rule=HostSNI(`${DOMAIN?Variable not set}`)
     #    - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
     #    - traefik.tcp.routers.mail_relay.tls.certresolver=le
