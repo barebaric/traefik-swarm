@@ -132,7 +132,7 @@ services:
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
     # Couldn't make postfix work through Traefik so far - "Relay access denied"
-        - traefik.tcp.routers.mail_relay.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.tcp.routers.mail_relay.rule=HostSNI(`${DOMAIN?Variable not set}`)
         #- traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
         - traefik.tcp.routers.mail_relay.tls.certresolver=le
         - traefik.tcp.routers.mail_relay.entrypoints=smtp
@@ -140,7 +140,7 @@ services:
         - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
         - traefik.smtp.routers.mail_relay.tls=true
         - traefik.smtp.routers.mail_relay.tls.certresolver=le
-        - traefik.smtp.routers.mail_relay.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.smtp.routers.mail_relay.rule=HostSNI(`${DOMAIN?Variable not set}`)
         - traefik.smtp.routers.mail_relay.entrypoints=smtp-tls
         - traefik.smtp.routers.mail_relay.service=mail_relay
         - traefik.smtp.services.mail_relay.loadbalancer.server.port=587
