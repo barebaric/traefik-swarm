@@ -73,6 +73,7 @@ services:
       - --serverstransport.insecureskipverify=true
     networks:
       - traefik-public
+      - mail
       - default
 
   registry:
@@ -124,8 +125,7 @@ services:
       - "465:465"
       - "587:587"
     networks:
-      - net
-      - traefik-public
+      - mail
     deploy:
       placement:
         constraints:
@@ -369,6 +369,10 @@ networks:
     external: true
 
   net:
+    driver: overlay
+    attachable: true
+
+  mail:
     driver: overlay
     attachable: true
 
