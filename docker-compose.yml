@@ -137,13 +137,12 @@ services:
         #- traefik.tcp.routers.mail_relay.entrypoints=smtp
         #- traefik.tcp.routers.mail_relay.service=mail_relay
         #- traefik.tcp.services.mail_relay.loadbalancer.server.port=25
-        - traefik.smtp.routers.mail_relay.tls=true
-        - traefik.smtp.routers.mail_relay.tls.certresolver=le
-        - traefik.smtp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
-        - traefik.smtp.routers.mail_relay.entrypoints=smtptls
-        - traefik.smtp.routers.mail_relay.service=mail_relay
-        - traefik.smtp.routers.mail_relay.port=587
-        - traefik.smtp.services.mail_relay.loadbalancer.server.port=587
+        - traefik.tcp.routers.mail_relay.tls=true
+        - traefik.tcp.routers.mail_relay.tls.certresolver=le
+        - traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
+        - traefik.tcp.routers.mail_relay.entrypoints=smtptls
+        - traefik.tcp.routers.mail_relay.service=mail_relay
+        - traefik.tcp.services.mail_relay.loadbalancer.server.port=587
     environment:
       - POSTFIX_RELAYHOST=smtp.gmail.com:587
       - SMTP_USER=${POSTFIX_SMTP_USER?Variable not set}:${POSTFIX_SMTP_PASSWORD?Variable not set}
