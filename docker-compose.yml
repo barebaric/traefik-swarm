@@ -132,18 +132,15 @@ services:
           - node.role == manager
       labels:
         - traefik.enable=true
+        - traefik.constraint-label=traefik-public
     # Couldn't make postfix work through Traefik so far - "Relay access denied"
         - traefik.docker.network=traefik-public
-        - traefik.tcp.routers.postfix-smtp.tls.certresolver=le
-        - traefik.tcp.routers.postfix-smtp.rule=HostSNI(`${DOMAIN?Variable not set}`)
-        - traefik.tcp.routers.postfix-smtp.entrypoints=smtp
-        - traefik.tcp.routers.postfix-smtp.service=mail_relay
-        - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
-    #    - traefik.constraint-label=traefik-public
+        - traefik.tcp.routers.mail_relay.rule=HostSNI(`${DOMAIN?Variable not set}`)
     #    - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
-    #    - traefik.tcp.routers.mail_relay.entrypoints=smtp
-    #    - traefik.tcp.routers.mail_relay.service=mail_relay
-    #    - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
+    #    - traefik.tcp.routers.mail_relay.tls.certresolver=le
+        - traefik.tcp.routers.mail_relay.entrypoints=smtp
+        - traefik.tcp.routers.mail_relay.service=mail_relay
+        - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
     environment:
       - POSTFIX_RELAYHOST=smtp.gmail.com:587
       - SMTP_USER=${POSTFIX_SMTP_USER?Variable not set}:${POSTFIX_SMTP_PASSWORD?Variable not set}
