@@ -138,7 +138,7 @@ services:
         - traefik.tcp.routers.postfix-smtp.rule=HostSNI(`${DOMAIN?Variable not set}`)
         - traefik.tcp.routers.postfix-smtp.entrypoints=smtp
         - traefik.tcp.routers.postfix-smtp.service=mail_relay
-        - traefik.tcp.services.postfix.loadbalancer.server.port=25
+        - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
     #    - traefik.constraint-label=traefik-public
     #    - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
     #    - traefik.tcp.routers.mail_relay.entrypoints=smtp
