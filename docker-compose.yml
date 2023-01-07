@@ -81,6 +81,8 @@ services:
     image: registry:2
     volumes:
       - docker-registry:/var/lib/registry
+    networks:
+      - traefik-public
     deploy:
       mode: 'global'
       labels:
@@ -239,6 +241,8 @@ services:
     image: silverwind/droppy
     volumes:
       - droppy:/files
+    networks:
+      - traefik-public
     restart: unless-stopped
     deploy:
       placement:
