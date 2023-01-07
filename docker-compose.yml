@@ -49,17 +49,17 @@ services:
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
       #- --entrypoints.smtp.address=:25
-      - --entrypoints.smtptls.address=:587
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
+      - --entrypoints.smtptls.address=:587
       - --entrypoints.https5000.address=:5000
       - --entrypoints.grpc.address=:8181
       # Enable Docker Swarm mode
       - --providers.docker
       - --providers.docker.swarmmode
       - --providers.docker.exposedbydefault=false
-      - --certificatesresolvers.le.acme.httpchallenge=true
-      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      #- --certificatesresolvers.le.acme.tlschallenge.entrypoint=http
       - --certificatesresolvers.le.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.le.acme.email=${LETSENCRYPT_EMAIL?Variable not set}
       # Store the Let's Encrypt certificates in the mounted volume
