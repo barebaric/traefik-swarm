@@ -2,7 +2,7 @@ version: "3.8"
 services:
   traefik:
     # Use the latest Traefik image
-    image: traefik:2.4
+    image: traefik:2.9.6
     ports:
       - "80:80"
       - "443:443"
