@@ -118,30 +118,8 @@ services:
         - traefik.http.services.gateone.loadbalancer.server.port=8000
         - traefik.http.services.gateone.loadbalancer.server.scheme=https
 
-  mail_forwarder:
-    image: mailu/mailu
-    networks:
-      - traefik-public
-    environment:
-      - DOMAINS=mail.${DOMAIN?Variable not set}
-      - ALIASES=me@mydomain.com:knipknap@gmail.com
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.tcp.routers.mail_forwarder.tls=true
-        - traefik.tcp.routers.mail_forwarder.tls.certresolver=le
-        - traefik.tcp.routers.mail_forwarder.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
-        - traefik.tcp.routers.mail_forwarder.entrypoints=smtptls
-        - traefik.tcp.routers.mail_forwarder.service=mail_forwarder
-        - traefik.tcp.services.mail_forwarder.loadbalancer.server.port=587
-
   mail_relay:
-    image: catatnight/postfix:latest
+    image: knipknap/docker-simple-mail-forwarder:latest
     networks:
       - traefik-public
     deploy:
@@ -152,13 +130,6 @@ services:
         - traefik.enable=false
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-    # Couldn't make postfix work through Traefik so far - "Relay access denied"
-        #- traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
-        #- traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
-        #- traefik.tcp.routers.mail_relay.tls.certresolver=le
-        #- traefik.tcp.routers.mail_relay.entrypoints=smtp
-        #- traefik.tcp.routers.mail_relay.service=mail_relay
-        #- traefik.tcp.services.mail_relay.loadbalancer.server.port=25
         - traefik.tcp.routers.mail_relay.tls=true
         - traefik.tcp.routers.mail_relay.tls.certresolver=le
         - traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
@@ -166,20 +137,11 @@ services:
         - traefik.tcp.routers.mail_relay.service=mail_relay
         - traefik.tcp.services.mail_relay.loadbalancer.server.port=587
     environment:
-      - POSTFIX_RELAYHOST=smtp.gmail.com:587
-      - SMTP_USER=${POSTFIX_SMTP_USER?Variable not set}:${POSTFIX_SMTP_PASSWORD?Variable not set}
-      - POSTFIX_VIRTUAL_ALIAS_MAPS=${POSTFIX_VIRTUAL_ALIAS_MAPS?Variable not set}
-      - POSTFIX_MYHOSTNAME=mail.${DOMAIN?Variable not set}
-      - POSTFIX_POSTMASTER=${LETSENCRYPT_EMAIL?Variable not set}
-      - POSTFIX_SMTP_TLS=yes
-      - POSTFIX_SMTP_CA_FILE=/etc/ssl/certs/ca-bundle.crt
-      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL?Variable not set}
-      - LETSENCRYPT_HOST=mail.${DOMAIN?Variable not set}
-      - LETSENCRYPT_TEST=true
-      - ENABLE_SPAMASSASSIN=1
-      - ENABLE_CLAMAV=1
-      - ENABLE_FAIL2BAN=1
-      - ENABLE_POSTGREY=1
+      - SMF_CONFIG=${SMF_CONFIG?Variable not set}
+      - SMF_DOMAIN=${DOMAIN?Variable not set}
+      - SMF_POSTFIX_myhostname=mail.${DOMAIN?Variable not set}
+      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
+      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
 
   swarmpit:
     image: swarmpit/swarmpit:latest
