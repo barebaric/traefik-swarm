@@ -122,8 +122,6 @@ services:
     image: catatnight/postfix:latest
     networks:
       - traefik-public
-    ports:
-      - 587
     deploy:
       placement:
         constraints:
@@ -144,6 +142,7 @@ services:
         - traefik.smtp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
         - traefik.smtp.routers.mail_relay.entrypoints=smtptls
         - traefik.smtp.routers.mail_relay.service=mail_relay
+        - traefik.smtp.routers.mail_relay.port=587
         - traefik.smtp.services.mail_relay.loadbalancer.server.port=587
     environment:
       - POSTFIX_RELAYHOST=smtp.gmail.com:587
