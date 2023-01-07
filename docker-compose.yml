@@ -4,7 +4,7 @@ services:
     # Use the latest Traefik image
     image: traefik:2.4
     ports:
-      #- "25:25"
+      - "25:25"
       - "80:80"
       - "443:443"
       - "5000:5000"
@@ -125,7 +125,6 @@ services:
       - "587:587"
     networks:
       - net
-      - default
       - traefik-public
     deploy:
       placement:
