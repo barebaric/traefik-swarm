@@ -2,7 +2,7 @@ version: "3.8"
 services:
   traefik:
     # Use the latest Traefik image
-    image: traefik:2.2.2
+    image: traefik:2.4
     ports:
       #- "25:25"
       - "80:80"
