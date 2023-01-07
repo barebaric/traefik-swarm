@@ -4,7 +4,6 @@ services:
     # Use the latest Traefik image
     image: traefik:2.4
     ports:
-      - "25:25"
       - "80:80"
       - "443:443"
       - "587:587"
@@ -49,8 +48,8 @@ services:
       - --log.level=DEBUG
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
-      - --entrypoints.smtp.address=:25
-      - --entrypoints.smtp-tls.address=:587
+      #- --entrypoints.smtp.address=:25
+      - --entrypoints.smtptls.address=:587
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
       - --entrypoints.https5000.address=:5000
@@ -141,7 +140,7 @@ services:
         - traefik.smtp.routers.mail_relay.tls=true
         - traefik.smtp.routers.mail_relay.tls.certresolver=le
         - traefik.smtp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
-        - traefik.smtp.routers.mail_relay.entrypoints=smtp-tls
+        - traefik.smtp.routers.mail_relay.entrypoints=smtptls
         - traefik.smtp.routers.mail_relay.service=mail_relay
         - traefik.smtp.services.mail_relay.loadbalancer.server.port=587
     environment:
