@@ -147,17 +147,17 @@ services:
       - POSTFIX_RELAYHOST=smtp.gmail.com:587
       - SMTP_USER=${POSTFIX_SMTP_USER?Variable not set}:${POSTFIX_SMTP_PASSWORD?Variable not set}
       - POSTFIX_VIRTUAL_ALIAS_MAPS=${POSTFIX_VIRTUAL_ALIAS_MAPS?Variable not set}
-      - ENABLE_SPAMASSASSIN=1
-      - ENABLE_CLAMAV=1
-      - ENABLE_FAIL2BAN=1
-      - ENABLE_POSTGREY=1
-      - POSTFIX_MYHOSTNAME=${DOMAIN?Variable not set}
+      - POSTFIX_MYHOSTNAME=mail.${DOMAIN?Variable not set}
       - POSTFIX_POSTMASTER=${LETSENCRYPT_EMAIL?Variable not set}
       - POSTFIX_SMTP_TLS=yes
       - POSTFIX_SMTP_CA_FILE=/etc/ssl/certs/ca-bundle.crt
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL?Variable not set}
-      - LETSENCRYPT_HOST=${DOMAIN?Variable not set}
+      - LETSENCRYPT_HOST=mail.${DOMAIN?Variable not set}
       - LETSENCRYPT_TEST=true
+      - ENABLE_SPAMASSASSIN=1
+      - ENABLE_CLAMAV=1
+      - ENABLE_FAIL2BAN=1
+      - ENABLE_POSTGREY=1
 
   swarmpit:
     image: swarmpit/swarmpit:latest
