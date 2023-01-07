@@ -136,7 +136,7 @@ services:
         - traefik.tcp.routers.mail_relay.tls.certresolver=le
         - traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
         - traefik.tcp.routers.mail_relay.entrypoints=smtptls
-        - traefik.tcp.routers.mail_relay.service=mail_relay
+        #- traefik.tcp.routers.mail_relay.service=mail_relay
         - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
     environment:
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
