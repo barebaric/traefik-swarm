@@ -118,6 +118,28 @@ services:
         - traefik.http.services.gateone.loadbalancer.server.port=8000
         - traefik.http.services.gateone.loadbalancer.server.scheme=https
 
+  mail_forwarder:
+    image: mailu/mailu
+    networks:
+      - traefik-public
+    environment:
+      - DOMAINS=mail.${DOMAIN?Variable not set}
+      - ALIASES=me@mydomain.com:knipknap@gmail.com
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.tcp.routers.mail_forwarder.tls=true
+        - traefik.tcp.routers.mail_forwarder.tls.certresolver=le
+        - traefik.tcp.routers.mail_forwarder.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
+        - traefik.tcp.routers.mail_forwarder.entrypoints=smtptls
+        - traefik.tcp.routers.mail_forwarder.service=mail_forwarder
+        - traefik.tcp.services.mail_forwarder.loadbalancer.server.port=587
+
   mail_relay:
     image: catatnight/postfix:latest
     networks:
@@ -127,7 +149,7 @@ services:
         constraints:
           - node.role == manager
       labels:
-        - traefik.enable=true
+        - traefik.enable=false
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
     # Couldn't make postfix work through Traefik so far - "Relay access denied"
