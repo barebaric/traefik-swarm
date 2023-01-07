@@ -127,7 +127,7 @@ services:
         constraints:
           - node.role == manager
       labels:
-        - traefik.enable=false
+        - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
         - traefik.tcp.routers.mail_relay.tls=true
