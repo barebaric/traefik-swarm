@@ -135,12 +135,14 @@ services:
         - traefik.constraint-label=traefik-public
         - traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
         - traefik.tcp.routers.mail_relay.entrypoints=smtp
+        - traefik.tcp.routers.mail_relay.service=mail_relay
         - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
         - traefik.tcp.routers.mail_relay_tls.tls=true
         - traefik.tcp.routers.mail_relay_tls.tls.certresolver=le
         - traefik.tcp.routers.mail_relay_tls.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
         - traefik.tcp.routers.mail_relay_tls.entrypoints=smtptls
-        - traefik.tcp.services.mail_relay_tls.loadbalancer.server.port=487
+        - traefik.tcp.routers.mail_relay_tls.service=mail_relay
+        - traefik.tcp.services.mail_relay_tls.loadbalancer.server.port=25
 
     environment:
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
