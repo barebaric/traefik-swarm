@@ -20,6 +20,7 @@ What you'll have when you are done:
 | https://&#8203;swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
 | https://&#8203;keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
 | https://&#8203;mail.yourdomain.com:25 | [Postfix](https://github.com/knipknap/docker-simple-mail-forwarder) | An SMTP server to forward emails to you
+| https://&#8203;mail.yourdomain.com:487 | [Postfix](https://github.com/knipknap/docker-simple-mail-forwarder) (TLS) | An SMTPS server to forward emails to you.<br/>$\textcolor{red}{\text{This service doesn't work!}}$<br/>While I managed to make this accept TLS connections, it doesn't fully work; I suspect a problem related to TLS options such as renegotiation. If you figure this out, please let me know.
 | https://&#8203;gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
 | https://&#8203;droppy.yourdomain.com | [Droppy](https://github.com/silverwind/droppy) | File storage server with a web interface
 | https://&#8203;yourdomain.com | [nginx](https://www.nginx.com/) | Webserver to serve public files uploaded using Droppy
