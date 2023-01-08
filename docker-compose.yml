@@ -4,6 +4,7 @@ services:
     # Use the latest Traefik image
     image: traefik:2.9.6
     ports:
+      - "25:25"
       - "80:80"
       - "443:443"
       - "587:587"
@@ -48,7 +49,7 @@ services:
       - --log.level=DEBUG
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
-      #- --entrypoints.smtp.address=:25
+      - --entrypoints.smtp.address=:25
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
       - --entrypoints.smtptls.address=:587
@@ -132,12 +133,15 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.tcp.routers.mail_relay.tls=true
-        - traefik.tcp.routers.mail_relay.tls.certresolver=le
         - traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
-        - traefik.tcp.routers.mail_relay.entrypoints=smtptls
-        #- traefik.tcp.routers.mail_relay.service=mail_relay
+        - traefik.tcp.routers.mail_relay.entrypoints=smtp
         - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
+        - traefik.tcp.routers.mail_relay_tls.tls=true
+        - traefik.tcp.routers.mail_relay_tls.tls.certresolver=le
+        - traefik.tcp.routers.mail_relay_tls.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
+        - traefik.tcp.routers.mail_relay_tls.entrypoints=smtptls
+        - traefik.tcp.services.mail_relay_tls.loadbalancer.server.port=487
+
     environment:
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
       - SMF_DOMAIN=${DOMAIN?Variable not set}
