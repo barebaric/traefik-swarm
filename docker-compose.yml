@@ -133,12 +133,12 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.tcp.routers.mail_relay.tls=true
-        - traefik.tcp.routers.mail_relay.tls.certresolver=le
-        - traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
+        # SMTP unencrypted
+        - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
         - traefik.tcp.routers.mail_relay.entrypoints=smtp
         - traefik.tcp.routers.mail_relay.service=mail_relay
         - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
+        # SMTP-TLS
         - traefik.tcp.routers.mail_relay_tls.tls=true
         - traefik.tcp.routers.mail_relay_tls.tls.certresolver=le
         - traefik.tcp.routers.mail_relay_tls.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
