@@ -133,7 +133,7 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
+        - traefik.tcp.routers.mail_relay.rule=Host(`mail.${DOMAIN?Variable not set}`)
         - traefik.tcp.routers.mail_relay.entrypoints=smtp
         - traefik.tcp.routers.mail_relay.service=mail_relay
         - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
