@@ -134,7 +134,6 @@ services:
         - traefik.constraint-label=traefik-public
         - traefik.tcp.routers.mail_relay.tls=true
         - traefik.tcp.routers.mail_relay.tls.certresolver=le
-        - traefik.tcp.routers.mail_relay.tls.options=tlsv12only
         - traefik.tcp.routers.mail_relay.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
         - traefik.tcp.routers.mail_relay.entrypoints=smtptls
         #- traefik.tcp.routers.mail_relay.service=mail_relay
