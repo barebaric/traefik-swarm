@@ -280,10 +280,10 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.routers.traefik-public-http.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.traefik-public-http.rule=Host(`web.${DOMAIN?Variable not set}`)
         - traefik.http.routers.traefik-public-http.entrypoints=http
         - traefik.http.routers.traefik-public-http.middlewares=https-redirect
-        - traefik.http.routers.traefik-public-https.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.traefik-public-https.rule=Host(`web.${DOMAIN?Variable not set}`)
         - traefik.http.routers.traefik-public-https.entrypoints=https
         - traefik.http.routers.traefik-public-https.tls=true
         - traefik.http.routers.traefik-public-https.tls.certresolver=le
