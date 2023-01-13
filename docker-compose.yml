@@ -312,8 +312,8 @@ services:
       - DB_DATABASE=keycloak
       - DB_USER=keycloak
       - DB_PASSWORD=keycloak-db-password
-      - KEYCLOAK_USER=${KEYCLOAK_ADMIN_USERNAME?Variable not set}
-      - KEYCLOAK_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD?Variable not set}
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USERNAME?Variable not set}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD?Variable not set}
       - PROXY_ADDRESS_FORWARDING=true
       - KEYCLOAK_HOSTNAME=sso.${DOMAIN?Variable not set}
     networks:
