@@ -307,7 +307,9 @@ services:
     image: quay.io/keycloak/keycloak:20.0.3
     environment:
       - KC_DB=mysql
-      - KC_DB_URL=jdbc:mysql://sso-mysql:3306/keycloak
+      - KC_DB_URL_HOST=sso-mysql
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_URL_PORT=3306
       - KC_DB_USERNAME=keycloak
       - KC_DB_PASSWORD=keycloak-db-password
       - KC_HOSTNAME=sso.${DOMAIN?Variable not set}
@@ -321,7 +323,7 @@ services:
       interval: 15s
       timeout: 2s
       retries: 15
-    command: start --optimized
+    command: start
     networks:
       - sso
       - traefik-public
