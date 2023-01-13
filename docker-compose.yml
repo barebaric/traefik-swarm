@@ -318,11 +318,11 @@ services:
       - KC_LOG_LEVEL=info
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USERNAME?Variable not set}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD?Variable not set}
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
-      interval: 15s
-      timeout: 2s
-      retries: 15
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
+#      interval: 15s
+#      timeout: 2s
+#      retries: 15
     command: start
     networks:
       - sso
