@@ -304,7 +304,7 @@ services:
       MYSQL_PASSWORD: keycloak-db-password
 
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    image: quay.io/keycloak/keycloak:20.0.3
     environment:
       - DB_VENDOR=MYSQL
       - DB_ADDR=sso-mysql
