@@ -84,6 +84,8 @@ services:
       - docker-registry:/var/lib/registry
     networks:
       - traefik-public
+    environment:
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
     deploy:
       mode: 'global'
       labels:
