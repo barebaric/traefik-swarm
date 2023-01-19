@@ -124,9 +124,11 @@ services:
         - traefik.http.services.gateone.loadbalancer.server.scheme=https
 
   mail_relay:
-    image: knipknap/docker-simple-mail-forwarder:latest
+    image: zixia/simple-mail-forwarder:1.4
     networks:
       - traefik-public
+    volumes:
+      - mail-relay:/var/db/dkim/
     deploy:
       placement:
         constraints:
@@ -150,12 +152,9 @@ services:
     environment:
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
       - SMF_DOMAIN=${DOMAIN?Variable not set}
-      - SMF_POSTFIX_mynetworks=10.0.0.0/8
-      - SMF_POSTFIX_myhostname=mail.${DOMAIN?Variable not set}
-      - SMF_POSTFIX_smtpd_tls_security_level=none
-      #- SMF_POSTFIX_smtpd_client_restrictions=permit_mynetworks,reject
-      - SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated
-      #- SMF_POSTFIX_smtpd_recipient_restrictions=permit_mynetworks
+      - SMF_POSTFIXMAIN_mynetworks=10.0.0.0/8
+      - SMF_POSTFIXMAIN_myhostname=mail.${DOMAIN?Variable not set}
+      - SMF_POSTFIXMAIN_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated,reject
 
   swarmpit:
     image: swarmpit/swarmpit:latest
@@ -351,6 +350,8 @@ services:
 volumes:
   db-data:
     driver: local
+
+  mail-relay:
 
   influx-data:
     driver: local
