@@ -152,9 +152,8 @@ services:
     environment:
       - SMF_CONFIG=${SMF_CONFIG?Variable not set}
       - SMF_DOMAIN=${DOMAIN?Variable not set}
-      - SMF_POSTFIXMAIN_mynetworks=10.0.0.0/8
       - SMF_POSTFIXMAIN_myhostname=mail.${DOMAIN?Variable not set}
-      - SMF_POSTFIXMAIN_smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated,reject
+      - SMF_POSTFIXMAIN_smtpd_recipient_restrictions=permit_sasl_authenticated,reject
 
   swarmpit:
     image: swarmpit/swarmpit:latest
