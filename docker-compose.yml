@@ -349,10 +349,7 @@ services:
   # Docker-GC - Automatic Docker Garbage Collection 
   dockergc:
     image: clockworksoul/docker-gc-cron:0.3.4
-    container_name: docker-gc
-    hostname: docker-gc
     restart: unless-stopped
-    network_mode: none
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -362,7 +359,11 @@ services:
       GRACE_PERIOD_SECONDS: 604800
       DRY_RUN: 0
       CLEAN_UP_VOLUMES: 1
-      TZ: ${TZ?Variable not set}
+      TZ: "Europe/Amsterdam"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
 volumes:
   db-data:
