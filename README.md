@@ -167,7 +167,6 @@ REGISTRY_USERNAME=myuser
 REGISTRY_HASHED_PASSWORD=`htpasswd -Bbn myuser mypassword`
 ```
 
-
 ## Set Keycloak admin user and password
 
 Just put in Github secrets (or set through environment variables in docker-compose file). Example:
@@ -177,21 +176,43 @@ KEYCLOAK_ADMIN_USERNAME=user
 KEYCLOAK_ADMIN_PASSWORD=password
 ```
 
-
 ## Configure simple-mail-forwarder
 
 To enable a mail forwarder, define the following variable in Github Secrets (or set through environment variables in docker-compose file):
 
 ```bash
-SMF_CONFIG=user@mydomain.com:test@gmail.com;user@mydomain2.com:test@gmail.com
+SMF_CONFIG=user@mydomain.com:test@gmail.com;user@mydomain2.com:test@gmail.com:mypassword
 ```
+
+> **Warning**
+> Make sure to include a password after the last `:` in the SMF_CONFIG variable. Otherwise spammers will find and use your mail relay.
+> This password will be used for authentication on your mail server before it relays anything to anyone.
+> The way SMF works is that the local email addresses double as user names for authentication, and the password is shared between all
+> these users.
+
+Example to test:
+
+```
+$ telnet mail.example.com 25
+EHLO mail.example.com
+AUTH LOGIN
+334 VXNlcm5hbWU6          # This is the server requesting the username
+dXNlckBteWRvbWFpbi5jb20=  # This is the base64 encoded username, e.g. `echo -n 'user@mydomain.com' | base64`
+334 UGFzc3dvcmQ6          # This is the server requesting the password
+bXlwYXNzd29yZA==          # This is the base64 encoded password, e.g. `echo -n 'mypassword' | base64`
+```
+
+> **Note**
+> If you want to use your mail server not just to forward mails to yourself, but as a general mail relay, you will have to **configure
+> DKIM** (including setting the appropriate DNS records), and you will need a **dedicated IP address with a PTR record**. You cannot
+> set this PTR record in your own DNS records and will need to ask your IP address provider to do that for you.
+> It is almost always easier and safer to ask your hosting provider if they already provide an SMTP service for their customers.
 
 ## Bring the whole stack online
 
 Start deploy on Github.
 Or, copy the docker-compose.yml from this repository root, and install using "docker deploy" (after setting all the variables mentioned above).
 Done.
-
 
 ## Test the registry user
 
