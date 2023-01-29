@@ -49,6 +49,7 @@ services:
       - --log.level=DEBUG
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       # Do not expose all Docker services, only the ones explicitly exposed
+      - --defaultentrypoints=http,https,ws,wss
       - --entrypoints.smtp.address=:25
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
