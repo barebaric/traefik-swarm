@@ -107,10 +107,12 @@ services:
   registry-ui:
     image: joxit/docker-registry-ui:2.3.3
     environment:
+      - DELETE_IMAGES=true
       - REGISTRY_TITLE=My Docker Registry
-      - REGISTRY_URL=http://${REGISTRY_DOMAIN}:5000
+      - REGISTRY_URL=http://registry:5000
       - SINGLE_REGISTRY=true
     networks:
+      - traefik-public
       - registry
     deploy:
       labels:
