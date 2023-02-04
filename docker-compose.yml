@@ -84,6 +84,7 @@ services:
       - docker-registry:/var/lib/registry
     networks:
       - traefik-public
+      - registry
     environment:
       - REGISTRY_STORAGE_DELETE_ENABLED=true
     deploy:
@@ -102,6 +103,29 @@ services:
         - traefik.http.routers.registry-https.tls.certresolver=le
         - traefik.http.routers.registry-https.middlewares=registry-auth
         - traefik.http.services.registry.loadbalancer.server.port=5000
+
+  registry-ui:
+    image: joxit/docker-registry-ui:2.3.3
+    environment:
+      - REGISTRY_TITLE=My Docker Registry
+      - REGISTRY_URL=http://registry:5000
+      - SINGLE_REGISTRY=true
+    networks:
+      - registry
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.registry-ui-http.rule=Host(`registry.${DOMAIN}`)
+        - traefik.http.routers.registry-ui-http.entrypoints=http
+        - traefik.http.routers.registry-ui-http.middlewares=https-redirect
+        - traefik.http.routers.registry-ui-https.rule=Host(`registry.${DOMAIN}`)
+        - traefik.http.routers.registry-ui-https.entrypoints=https
+        - traefik.http.routers.registry-ui-https.tls=true
+        - traefik.http.routers.registry-ui-https.tls.certresolver=le
+        - traefik.http.routers.registry-ui-https.middlewares=registry-auth
+        - traefik.http.services.registry-ui.loadbalancer.server.port=80
 
   gateone:
     image: dezota/gateone
@@ -399,6 +423,9 @@ networks:
   traefik-public:
     external: true
 
+  registry:
+    driver: overlay
+ 
   net:
     driver: overlay
     attachable: true
