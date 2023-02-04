@@ -109,7 +109,7 @@ services:
     environment:
       - DELETE_IMAGES=true
       - REGISTRY_TITLE=My Docker Registry
-      - REGISTRY_URL=https://${REGISTRY_DOMAIN}:5000
+      - NGINX_PROXY_PASS_URL=http://registry:5000
       - SINGLE_REGISTRY=true
     networks:
       - traefik-public
