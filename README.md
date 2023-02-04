@@ -16,6 +16,7 @@ What you'll have when you are done:
 |----------|---------|-------------
 | - | [Docker Swarm](https://docs.docker.com/engine/swarm/) | The core swarm
 | - | [Docker GC](https://hub.docker.com/r/clockworksoul/docker-gc-cron) | Automatic container garbage collection (runs at midnight by default)
+| https://&#8203;registry.yourdomain.com | [Docker Registry UI](https://github.com/Joxit/docker-registry-ui) | UI for your private docker registry.
 | https://&#8203;registry.yourdomain.com:5000 | [Docker Registry](https://docs.docker.com/registry/) | Your own private docker registry. Needed to deploy your own containers to your swarm
 | https://&#8203;traefik.yourdomain.com | [Traefik](https://github.com/containous/traefik/) | The automatic reverse proxy, including its admin UI. [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
 | https://&#8203;swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
