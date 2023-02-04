@@ -93,7 +93,7 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME?Variable not set}:${REGISTRY_HASHED_PASSWORD?Variable not set}
+        - traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME}:${REGISTRY_HASHED_PASSWORD}
         - traefik.http.routers.registry-http.rule=Host(`${REGISTRY_DOMAIN?Variable not set}`)
         - traefik.http.routers.registry-http.entrypoints=http
         - traefik.http.routers.registry-http.middlewares=https5000-redirect
@@ -108,7 +108,7 @@ services:
     image: joxit/docker-registry-ui:2.3.3
     environment:
       - REGISTRY_TITLE=My Docker Registry
-      - REGISTRY_URL=http://registry:5000
+      - REGISTRY_URL=http://${REGISTRY_DOMAIN}:5000
       - SINGLE_REGISTRY=true
     networks:
       - registry
