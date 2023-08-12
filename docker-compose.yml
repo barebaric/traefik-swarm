@@ -153,6 +153,8 @@ services:
     image: zixia/simple-mail-forwarder:1.4
     networks:
       - traefik-public
+      # Putting this on network default because I couldn't get TLS to work through traefik
+      - default
     volumes:
       - mail-relay:/var/db/dkim/
     deploy:
