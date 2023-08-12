@@ -149,40 +149,6 @@ services:
         - traefik.http.services.gateone.loadbalancer.server.port=8000
         - traefik.http.services.gateone.loadbalancer.server.scheme=https
 
-  mail_relay:
-    image: zixia/simple-mail-forwarder:1.4
-    networks:
-      - traefik-public
-      # Putting this on network default because I couldn't get TLS to work through traefik
-      - default
-    volumes:
-      - mail-relay:/var/db/dkim/
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        # SMTP unencrypted
-        - traefik.tcp.routers.mail_relay.rule=HostSNI(`*`)
-        - traefik.tcp.routers.mail_relay.entrypoints=smtp
-        - traefik.tcp.routers.mail_relay.service=mail_relay
-        - traefik.tcp.services.mail_relay.loadbalancer.server.port=25
-        # SMTP-TLS
-        - traefik.tcp.routers.mail_relay_tls.tls=true
-        - traefik.tcp.routers.mail_relay_tls.tls.certresolver=le
-        - traefik.tcp.routers.mail_relay_tls.rule=HostSNI(`mail.${DOMAIN?Variable not set}`)
-        - traefik.tcp.routers.mail_relay_tls.entrypoints=smtptls
-        - traefik.tcp.routers.mail_relay_tls.service=mail_relay
-        - traefik.tcp.services.mail_relay_tls.loadbalancer.server.port=25
-    environment:
-      - SMF_CONFIG=${SMF_CONFIG?Variable not set}
-      - SMF_DOMAIN=${DOMAIN?Variable not set}
-      - SMF_POSTFIXMAIN_myhostname=mail.${DOMAIN?Variable not set}
-      - SMF_POSTFIXMAIN_smtpd_recipient_restrictions=permit_sasl_authenticated,reject
-
   swarmpit:
     image: swarmpit/swarmpit:latest
     environment:
@@ -396,8 +362,6 @@ services:
 volumes:
   db-data:
     driver: local
-
-  mail-relay:
 
   influx-data:
     driver: local
