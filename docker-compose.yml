@@ -298,7 +298,7 @@ services:
       MYSQL_PASSWORD: keycloak-db-password
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21
+    image: quay.io/keycloak/keycloak:21.0
     environment:
       - KC_DB=mysql
       - KC_DB_URL_HOST=sso-mysql
