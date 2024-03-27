@@ -285,23 +285,23 @@ services:
     networks:
       - traefik-public
 
-  sso-mariadb:
-    image: mariadb:11
+  sso-mysql:
+    image: mysql:8
     volumes:
-      - sso-mysql-data:/var/lib/mariadb
+      - sso-mysql-data:/var/lib/mysql
     networks:
       - sso
     environment:
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: keycloak
-      MARIADB_USER: keycloak
-      MARIADB_PASSWORD: keycloak-db-password
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: keycloak-db-password
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     environment:
-      - KC_DB=mariadb
-      - KC_DB_URL_HOST=sso-mariadb
+      - KC_DB=mysql
+      - KC_DB_URL_HOST=sso-mysql
       - KC_DB_URL_DATABASE=keycloak
       - KC_DB_URL_PORT=3306
       - KC_DB_USERNAME=keycloak
@@ -323,7 +323,7 @@ services:
       - sso
       - traefik-public
     depends_on:
-      - sso-mariadb
+      - sso-mysql
     deploy:
       placement:
         constraints:
