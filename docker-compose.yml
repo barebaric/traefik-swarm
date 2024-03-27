@@ -151,9 +151,9 @@ services:
 
   swarmpit:
     image: swarmpit/swarmpit:latest
-    environment:
-      - SWARMPIT_DB=http://swarmpit:swarmpit@couchdb:5984
-      - SWARMPIT_INFLUXDB=http://influxdb:8086
+    #environment:
+    #  - SWARMPIT_DB=http://swarmpit:swarmpit@couchdb:5984
+    #  - SWARMPIT_INFLUXDB=http://influxdb:8086
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
@@ -184,7 +184,7 @@ services:
         - traefik.http.services.swarmpit.loadbalancer.server.port=8080
 
   couchdb:
-    image: couchdb:3
+    image: couchdb:2.3
     environment:
       - COUCHDB_USER=swarmpit
       - COUCHDB_PASSWORD=swarmpit
