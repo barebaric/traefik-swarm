@@ -347,7 +347,7 @@ services:
 
   # Docker-GC - Automatic Docker Garbage Collection 
   dockergc:
-    image: clockworksoul/docker-gc-cron:0.3.4
+    image: clockworksoul/docker-gc-cron:20240219
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
