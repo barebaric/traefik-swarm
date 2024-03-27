@@ -288,7 +288,7 @@ services:
   sso-mariadb:
     image: mariadb:11
     volumes:
-      - sso-mysql-data:/var/lib/mariadb
+      - sso-mysql-data:/var/lib/mysql
     networks:
       - sso
     environment:
@@ -296,7 +296,6 @@ services:
       MARIADB_DATABASE: keycloak
       MARIADB_USER: keycloak
       MARIADB_PASSWORD: keycloak-db-password
-      MARIADB_AUTO_UPGRADE: 1
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
