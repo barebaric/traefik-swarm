@@ -286,7 +286,7 @@ services:
       - traefik-public
 
   sso-mysql:
-    image: mysql:5.7
+    image: mysql:8
     volumes:
       - sso-mysql-data:/var/lib/mysql
     networks:
