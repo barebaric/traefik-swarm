@@ -151,9 +151,9 @@ services:
 
   swarmpit:
     image: swarmpit/swarmpit:latest
-    #environment:
-    #  - SWARMPIT_DB=http://swarmpit:swarmpit@couchdb:5984
-    #  - SWARMPIT_INFLUXDB=http://influxdb:8086
+    environment:
+      - SWARMPIT_DB=http://couchdb:5984
+      - SWARMPIT_INFLUXDB=http://influxdb:8086
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
@@ -185,9 +185,9 @@ services:
 
   couchdb:
     image: couchdb:2.3
-    environment:
-      - COUCHDB_USER=swarmpit
-      - COUCHDB_PASSWORD=swarmpit
+    #environment:
+    #  - COUCHDB_USER=swarmpit
+    #  - COUCHDB_PASSWORD=swarmpit
     volumes:
       - db-data:/opt/couchdb/data
     networks:
