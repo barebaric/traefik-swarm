@@ -286,7 +286,7 @@ services:
       - traefik-public
 
   sso-mariadb:
-    image: mysql:8
+    image: mariadb:11
     volumes:
       - sso-mysql-data:/var/lib/mariadb
     networks:
