@@ -184,7 +184,7 @@ services:
         - traefik.http.services.swarmpit.loadbalancer.server.port=8080
 
   db:
-    image: couchdb:2.3.0
+    image: couchdb:3
     volumes:
       - db-data:/opt/couchdb/data
     networks:
@@ -202,7 +202,7 @@ services:
           - node.role == manager
 
   influxdb:
-    image: influxdb:1.8
+    image: influxdb:2
     volumes:
       - influx-data:/var/lib/influxdb
     networks:
