@@ -29,7 +29,7 @@ jobs:
         envkey_REGISTRY_DOMAIN: ${{ secrets.REGISTRY_DOMAIN }}
         envkey_REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
         envkey_REGISTRY_HASHED_PASSWORD: ${{ secrets.REGISTRY_HASHED_PASSWORD }}
-        envkey_SMF_CONFIG: ${{ secrets.SMF_CONFIG }}
+        envkey_DOH_ADMIN_PASSWORD: ${{ secrets.DOH_ADMIN_PASSWORD }}
         envkey_KEYCLOAK_ADMIN_USERNAME: ${{ secrets.KEYCLOAK_ADMIN_USERNAME }}
         envkey_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
         file_name: .env
