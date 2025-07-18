@@ -373,7 +373,7 @@ services:
         - traefik.http.routers.doh-ui-https.tls=true
         - traefik.http.routers.doh-ui-https.tls.certresolver=le
         # Router for the DNS-over-HTTPS endpoint, on port 1443
-        - traefik.http.routers.doh-https.rule=Host(`dns.${DOMAIN?Variable not set}`) && Path(`/dns-query`)
+        - traefik.http.routers.doh-https.rule=Host(`dns.${DOMAIN?Variable not set}`)
         - traefik.http.routers.doh-https.entrypoints=doh-https
         - traefik.http.routers.doh-https.tls=true
         - traefik.http.routers.doh-https.tls.certresolver=le
