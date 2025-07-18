@@ -369,11 +369,10 @@ services:
         - traefik.constraint-label=traefik-public
         # Router for the DNS Server Web UI, on port 1443
         - traefik.http.routers.doh-ui-https.rule=Host(`dns-ui.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.doh-ui-https.entrypoints=doh-https
+        - traefik.http.routers.doh-ui-https.entrypoints=https
         - traefik.http.routers.doh-ui-https.tls=true
         - traefik.http.routers.doh-ui-https.tls.certresolver=le
-        - traefik.http.routers.doh-ui-https.service=doh-service
-        - traefik.http.routers.doh-ui-https.middlewares=admin-auth # Secure the UI
+        - traefik.http.routers.doh-ui-https.middlewares=admin-auth
         # Router for the DNS-over-HTTPS endpoint, on port 1443
         - traefik.http.routers.doh-https.rule=Host(`dns.${DOMAIN?Variable not set}`) && Path(`/dns-query`)
         - traefik.http.routers.doh-https.entrypoints=doh-https
