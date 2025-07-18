@@ -367,13 +367,11 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        # Router for the DNS Server Web UI, on port 1443
-        - traefik.http.routers.doh-ui-https.rule=Host(`dns.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.doh-ui-https.entrypoints=https
-        - traefik.http.routers.doh-ui-https.tls=true
-        - traefik.http.routers.doh-ui-https.tls.certresolver=le
-        # Define the service for Traefik to connect to
-        - traefik.http.services.doh-service.loadbalancer.server.port=80
+        - traefik.http.routers.doh-https.rule=Host(`dns.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.doh-https.entrypoints=https
+        - traefik.http.routers.doh-https.tls=true
+        - traefik.http.routers.doh-https.tls.certresolver=le
+        - traefik.http.services.doh.loadbalancer.server.port=80
 
   # Docker-GC - Automatic Docker Garbage Collection
   dockergc:
