@@ -8,6 +8,7 @@ services:
       - "80:80"
       - "443:443"
       - "587:587"
+      - "1443:1443" # Port for DNS over HTTPS
       - "5000:5000"
       - "8181:8181"
     deploy:
@@ -52,6 +53,7 @@ services:
       - --entrypoints.smtp.address=:25
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
+      - --entrypoints.doh-https.address=:1443 # Entrypoint for DoH
       - --entrypoints.smtptls.address=:587
       - --entrypoints.https5000.address=:5000
       - --entrypoints.grpc.address=:8181
@@ -345,7 +347,43 @@ services:
         - traefik.http.routers.keycloak-https.tls.certresolver=le
         - traefik.http.services.keycloak.loadbalancer.server.port=8080
 
-  # Docker-GC - Automatic Docker Garbage Collection 
+  doh:
+    image: technitium/dns-server:latest
+    hostname: dns-server
+    environment:
+      # Set a strong password for the DNS server admin UI
+      - DNS_SERVER_ADMIN_PASSWORD=${DOH_ADMIN_PASSWORD?Variable not set}
+      # The domain that will be used for DoH. Traefik will handle the certificate.
+      - DNS_SERVER_DOMAIN=dns.${DOMAIN?Variable not set}
+    volumes:
+      - doh-config:/etc/dns
+    networks:
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        # Router for the DNS Server Web UI, on port 1443
+        - traefik.http.routers.doh-ui-https.rule=Host(`dns-ui.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.doh-ui-https.entrypoints=doh-https
+        - traefik.http.routers.doh-ui-https.tls=true
+        - traefik.http.routers.doh-ui-https.tls.certresolver=le
+        - traefik.http.routers.doh-ui-https.service=doh-service
+        - traefik.http.routers.doh-ui-https.middlewares=admin-auth # Secure the UI
+        # Router for the DNS-over-HTTPS endpoint, on port 1443
+        - traefik.http.routers.doh-https.rule=Host(`dns.${DOMAIN?Variable not set}`) && Path(`/dns-query`)
+        - traefik.http.routers.doh-https.entrypoints=doh-https
+        - traefik.http.routers.doh-https.tls=true
+        - traefik.http.routers.doh-https.tls.certresolver=le
+        - traefik.http.routers.doh-https.service=doh-service
+        # Define the service for Traefik to connect to
+        - traefik.http.services.doh-service.loadbalancer.server.port=5380
+
+  # Docker-GC - Automatic Docker Garbage Collection
   dockergc:
     image: clockworksoul/docker-gc-cron:20240219
     restart: unless-stopped
@@ -389,6 +427,9 @@ volumes:
 
   sso-mysql-data:
     driver: local
+  
+  doh-config:
+    driver: local
 
 networks:
   # Use the previously created public network "traefik-public", shared with other
@@ -398,7 +439,7 @@ networks:
 
   registry:
     driver: overlay
- 
+  
   net:
     driver: overlay
     attachable: true
