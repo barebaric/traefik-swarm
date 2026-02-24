@@ -472,6 +472,9 @@ volumes:
   doh-config:
     driver: local
 
+  umami-db-data:
+    driver: local
+
 networks:
   # Use the previously created public network "traefik-public", shared with other
   # services that need to be publicly available via this Traefik
@@ -486,5 +489,9 @@ networks:
     attachable: true
 
   sso:
+    driver: overlay
+    attachable: true
+
+  umami:
     driver: overlay
     attachable: true
