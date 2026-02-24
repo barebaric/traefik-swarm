@@ -404,7 +404,7 @@ services:
     environment:
       POSTGRES_DB: umami
       POSTGRES_USER: umami
-      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD?Variable not set}
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD}
     volumes:
       - umami-db-data:/var/lib/postgresql/data
     networks:
@@ -418,7 +418,7 @@ services:
     image: ghcr.io/umami-software/umami:postgresql-latest
     environment:
       DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD}@umami-db:5432/umami
-      APP_SECRET: ${UMAMI_APP_SECRET?Variable not set}
+      APP_SECRET: ${UMAMI_APP_SECRET}
       DISABLE_TELEMETRY: "1"
     networks:
       - umami
