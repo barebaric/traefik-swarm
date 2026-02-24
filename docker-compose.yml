@@ -399,6 +399,50 @@ services:
         constraints:
           - node.role == manager
 
+  umami-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD?Variable not set}
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    networks:
+      - umami
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    environment:
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD}@umami-db:5432/umami
+      APP_SECRET: ${UMAMI_APP_SECRET?Variable not set}
+      DISABLE_TELEMETRY: "1"
+    networks:
+      - umami
+      - traefik-public
+    depends_on:
+      - umami-db
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.umami-http.rule=Host(`analytics.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.umami-http.entrypoints=http
+        - traefik.http.routers.umami-http.middlewares=https-redirect
+        - traefik.http.routers.umami-https.rule=Host(`analytics.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.umami-https.entrypoints=https
+        - traefik.http.routers.umami-https.tls=true
+        - traefik.http.routers.umami-https.tls.certresolver=le
+        - traefik.http.routers.umami-https.middlewares=admin-auth
+        - traefik.http.services.umami.loadbalancer.server.port=3000
+
 volumes:
   db-data:
     driver: local
