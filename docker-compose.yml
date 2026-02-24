@@ -440,7 +440,6 @@ services:
         - traefik.http.routers.umami-https.entrypoints=https
         - traefik.http.routers.umami-https.tls=true
         - traefik.http.routers.umami-https.tls.certresolver=le
-        - traefik.http.routers.umami-https.middlewares=admin-auth
         - traefik.http.services.umami.loadbalancer.server.port=3000
 
 volumes:
