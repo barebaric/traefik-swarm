@@ -458,10 +458,11 @@ services:
           - node.role == manager
 
   signoz-otel-collector:
-    image: signoz/signoz-otel-collector:0.88.8
+    image: signoz/signoz-otel-collector:latest
     command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    configs:
+      - source: otel-collector-config
+        target: /etc/otel-collector-config.yaml
     networks:
       - signoz
       - traefik-public
@@ -485,8 +486,7 @@ services:
         - traefik.http.services.otel-collector.loadbalancer.server.port=4318
 
   signoz:
-    image: signoz/signoz:0.88.8
-    command: ["--config=/config.yaml"]
+    image: signoz/signoz:latest
     environment:
       - SIGNOZ_CLICKHOUSE_DSN=tcp://clickhouse:9000?database=signoz&username=signoz&password=${CLICKHOUSE_PASSWORD}
     depends_on:
