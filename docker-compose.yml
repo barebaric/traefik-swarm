@@ -442,29 +442,14 @@ services:
         - traefik.http.routers.umami-https.tls.certresolver=le
         - traefik.http.services.umami.loadbalancer.server.port=3000
 
-  clickhouse:
-    image: clickhouse/clickhouse-server:24.1
-    environment:
-      CLICKHOUSE_DB: signoz
-      CLICKHOUSE_USER: signoz
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD?Variable not set}
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:latest
+    command:
+      - "--retentionPeriod=12m"
+      - "--httpListenAddr=:8428"
     volumes:
-      - signoz-clickhouse:/var/lib/clickhouse
+      - victoria-data:/victoria-metrics-data
     networks:
-      - signoz
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-
-  signoz-otel-collector:
-    image: signoz/signoz-otel-collector:latest
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    configs:
-      - source: otel-collector-config
-        target: /etc/otel-collector-config.yaml
-    networks:
-      - signoz
       - traefik-public
     deploy:
       placement:
@@ -483,17 +468,17 @@ services:
         - traefik.http.routers.otel-https.tls=true
         - traefik.http.routers.otel-https.tls.certresolver=le
         - traefik.http.routers.otel-https.middlewares=otel-auth
-        - traefik.http.services.otel-collector.loadbalancer.server.port=4318
+        - traefik.http.services.victoria-metrics.loadbalancer.server.port=8428
 
-  signoz:
-    image: signoz/signoz:latest
+  grafana:
+    image: grafana/grafana:latest
     environment:
-      - SIGNOZ_CLICKHOUSE_DSN=tcp://clickhouse:9000?database=signoz&username=signoz&password=${CLICKHOUSE_PASSWORD}
-    depends_on:
-      - clickhouse
-      - signoz-otel-collector
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD?Variable not set}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
     networks:
-      - signoz
       - traefik-public
     deploy:
       placement:
@@ -503,15 +488,15 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.routers.signoz-http.rule=Host(`signoz.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.signoz-http.entrypoints=http
-        - traefik.http.routers.signoz-http.middlewares=https-redirect
-        - traefik.http.routers.signoz-https.rule=Host(`signoz.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.signoz-https.entrypoints=https
-        - traefik.http.routers.signoz-https.tls=true
-        - traefik.http.routers.signoz-https.tls.certresolver=le
-        - traefik.http.routers.signoz-https.middlewares=admin-auth
-        - traefik.http.services.signoz.loadbalancer.server.port=3301
+        - traefik.http.routers.grafana-http.rule=Host(`grafana.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.grafana-http.entrypoints=http
+        - traefik.http.routers.grafana-http.middlewares=https-redirect
+        - traefik.http.routers.grafana-https.rule=Host(`grafana.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.grafana-https.entrypoints=https
+        - traefik.http.routers.grafana-https.tls=true
+        - traefik.http.routers.grafana-https.tls.certresolver=le
+        - traefik.http.routers.grafana-https.middlewares=admin-auth
+        - traefik.http.services.grafana.loadbalancer.server.port=3000
 
 volumes:
   db-data:
@@ -545,7 +530,10 @@ volumes:
   umami-db-data:
     driver: local
 
-  signoz-clickhouse:
+  victoria-data:
+    driver: local
+
+  grafana-data:
     driver: local
 
 networks:
@@ -568,50 +556,3 @@ networks:
   umami:
     driver: overlay
     attachable: true
-
-  signoz:
-    driver: overlay
-    attachable: true
-
-configs:
-  otel-collector-config:
-    content: |
-      receivers:
-        otlp:
-          protocols:
-            http:
-              endpoint: 0.0.0.0:4318
-            grpc:
-              endpoint: 0.0.0.0:4317
-
-      processors:
-        batch:
-          timeout: 1s
-          send_batch_size: 1024
-
-      exporters:
-        clickhousemetrics:
-          endpoint: tcp://clickhouse:9000
-          database: signoz
-          username: signoz
-          password: ${CLICKHOUSE_PASSWORD}
-          ttl: 168h
-        otlp:
-          endpoint: signoz:4317
-          tls:
-            insecure: true
-
-      service:
-        pipelines:
-          metrics:
-            receivers: [otlp]
-            processors: [batch]
-            exporters: [clickhousemetrics]
-          traces:
-            receivers: [otlp]
-            processors: [batch]
-            exporters: [otlp]
-          logs:
-            receivers: [otlp]
-            processors: [batch]
-            exporters: [otlp]
