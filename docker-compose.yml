@@ -442,6 +442,77 @@ services:
         - traefik.http.routers.umami-https.tls.certresolver=le
         - traefik.http.services.umami.loadbalancer.server.port=3000
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.1
+    environment:
+      CLICKHOUSE_DB: signoz
+      CLICKHOUSE_USER: signoz
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD?Variable not set}
+    volumes:
+      - signoz-clickhouse:/var/lib/clickhouse
+    networks:
+      - signoz
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  signoz-otel-collector:
+    image: signoz/signoz-otel-collector:0.88.8
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    networks:
+      - signoz
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.middlewares.otel-auth.basicauth.users=${OTEL_API_USER?Variable not set}:${OTEL_API_HASH?Variable not set}
+        - traefik.http.routers.otel-http.rule=Host(`otel.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.otel-http.entrypoints=http
+        - traefik.http.routers.otel-http.middlewares=https-redirect
+        - traefik.http.routers.otel-https.rule=Host(`otel.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.otel-https.entrypoints=https
+        - traefik.http.routers.otel-https.tls=true
+        - traefik.http.routers.otel-https.tls.certresolver=le
+        - traefik.http.routers.otel-https.middlewares=otel-auth
+        - traefik.http.services.otel-collector.loadbalancer.server.port=4318
+
+  signoz:
+    image: signoz/signoz:0.88.8
+    command: ["--config=/config.yaml"]
+    environment:
+      - SIGNOZ_CLICKHOUSE_DSN=tcp://clickhouse:9000?database=signoz&username=signoz&password=${CLICKHOUSE_PASSWORD}
+    depends_on:
+      - clickhouse
+      - signoz-otel-collector
+    networks:
+      - signoz
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.signoz-http.rule=Host(`signoz.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.signoz-http.entrypoints=http
+        - traefik.http.routers.signoz-http.middlewares=https-redirect
+        - traefik.http.routers.signoz-https.rule=Host(`signoz.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.signoz-https.entrypoints=https
+        - traefik.http.routers.signoz-https.tls=true
+        - traefik.http.routers.signoz-https.tls.certresolver=le
+        - traefik.http.routers.signoz-https.middlewares=admin-auth
+        - traefik.http.services.signoz.loadbalancer.server.port=3301
+
 volumes:
   db-data:
     driver: local
@@ -474,6 +545,9 @@ volumes:
   umami-db-data:
     driver: local
 
+  signoz-clickhouse:
+    driver: local
+
 networks:
   # Use the previously created public network "traefik-public", shared with other
   # services that need to be publicly available via this Traefik
@@ -492,5 +566,9 @@ networks:
     attachable: true
 
   umami:
+    driver: overlay
+    attachable: true
+
+  signoz:
     driver: overlay
     attachable: true
