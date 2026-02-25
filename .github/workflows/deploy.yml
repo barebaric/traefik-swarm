@@ -36,7 +36,6 @@ jobs:
         envkey_UMAMI_APP_SECRET: ${{ secrets.UMAMI_APP_SECRET }}
         envkey_OTEL_API_USER: ${{ secrets.OTEL_API_USER }}
         envkey_OTEL_API_HASH: ${{ secrets.OTEL_API_HASH }}
-        envkey_GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
         file_name: .env
 
     - name: Deploy to Docker swarm
