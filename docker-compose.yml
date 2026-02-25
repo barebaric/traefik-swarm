@@ -445,7 +445,7 @@ services:
   victoria-metrics:
     image: victoriametrics/victoria-metrics:latest
     command:
-      - "--retentionPeriod=12m"
+      - "--retentionPeriod=12M"
       - "--httpListenAddr=:8428"
     volumes:
       - victoria-data:/victoria-metrics-data
