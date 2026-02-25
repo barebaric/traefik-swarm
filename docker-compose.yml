@@ -459,43 +459,16 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.middlewares.otel-auth.basicauth.users=${OTEL_API_USER?Variable not set}:${OTEL_API_HASH?Variable not set}
-        - traefik.http.routers.otel-http.rule=Host(`otel.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.otel-http.entrypoints=http
-        - traefik.http.routers.otel-http.middlewares=https-redirect
-        - traefik.http.routers.otel-https.rule=Host(`otel.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.otel-https.entrypoints=https
-        - traefik.http.routers.otel-https.tls=true
-        - traefik.http.routers.otel-https.tls.certresolver=le
-        - traefik.http.routers.otel-https.middlewares=otel-auth
+        - traefik.http.middlewares.metrics-auth.basicauth.users=${OTEL_API_USER?Variable not set}:${OTEL_API_HASH?Variable not set}
+        - traefik.http.routers.vm-http.rule=Host(`metrics.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.vm-http.entrypoints=http
+        - traefik.http.routers.vm-http.middlewares=https-redirect
+        - traefik.http.routers.vm-https.rule=Host(`metrics.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.vm-https.entrypoints=https
+        - traefik.http.routers.vm-https.tls=true
+        - traefik.http.routers.vm-https.tls.certresolver=le
+        - traefik.http.routers.vm-https.middlewares=metrics-auth
         - traefik.http.services.victoria-metrics.loadbalancer.server.port=8428
-
-  grafana:
-    image: grafana/grafana:latest
-    environment:
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-    volumes:
-      - grafana-data:/var/lib/grafana
-    networks:
-      - traefik-public
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.grafana-http.rule=Host(`grafana.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.grafana-http.entrypoints=http
-        - traefik.http.routers.grafana-http.middlewares=https-redirect
-        - traefik.http.routers.grafana-https.rule=Host(`grafana.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.grafana-https.entrypoints=https
-        - traefik.http.routers.grafana-https.tls=true
-        - traefik.http.routers.grafana-https.tls.certresolver=le
-        - traefik.http.routers.grafana-https.middlewares=admin-auth
-        - traefik.http.services.grafana.loadbalancer.server.port=3000
 
 volumes:
   db-data:
@@ -530,9 +503,6 @@ volumes:
     driver: local
 
   victoria-data:
-    driver: local
-
-  grafana-data:
     driver: local
 
 networks:
