@@ -472,7 +472,8 @@ services:
 
   opencode:
     image: openeuler/opencode:1.1.48-oe2403lts
-    command: ["web", "--hostname", "0.0.0.0", "--port", "4096"]
+    entrypoint: ["sh", "-c"]
+    command: ["mkdir -p /workspace/projects && exec opencode web --hostname 0.0.0.0 --port 4096"]
     environment:
       - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD?Variable not set}
     volumes:
