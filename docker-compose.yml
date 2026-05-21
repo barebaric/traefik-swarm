@@ -477,6 +477,7 @@ services:
       - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD?Variable not set}
     volumes:
       - opencode-config:/root/.config/opencode
+      - opencode-config:/workspace
     networks:
       - traefik-public
     deploy:
