@@ -470,6 +470,32 @@ services:
         - traefik.http.routers.vm-https.middlewares=metrics-auth
         - traefik.http.services.victoria-metrics.loadbalancer.server.port=8428
 
+  opencode:
+    image: openeuler/opencode:1.1.48-oe2403lts
+    command: ["opencode", "web", "--hostname", "0.0.0.0", "--port", "4096"]
+    environment:
+      - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD?Variable not set}
+    volumes:
+      - opencode-config:/root/.config/opencode
+    networks:
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.opencode-http.rule=Host(`opencode.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.opencode-http.entrypoints=http
+        - traefik.http.routers.opencode-http.middlewares=https-redirect
+        - traefik.http.routers.opencode-https.rule=Host(`opencode.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.opencode-https.entrypoints=https
+        - traefik.http.routers.opencode-https.tls=true
+        - traefik.http.routers.opencode-https.tls.certresolver=le
+        - traefik.http.services.opencode.loadbalancer.server.port=4096
+
 volumes:
   db-data:
     driver: local
@@ -503,6 +529,9 @@ volumes:
     driver: local
 
   victoria-data:
+    driver: local
+
+  opencode-config:
     driver: local
 
 networks:

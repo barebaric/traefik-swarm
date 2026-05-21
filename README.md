@@ -24,6 +24,7 @@ What you'll have when you are done:
 | https://&#8203;gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
 | https://&#8203;droppy.yourdomain.com | [Droppy](https://github.com/silverwind/droppy) | File storage server with a web interface
 | https://&#8203;web.yourdomain.com | [nginx](https://www.nginx.com/) | Webserver to serve public files uploaded using Droppy
+| https://&#8203;opencode.yourdomain.com | [OpenCode](https://opencode.ai) | AI coding agent with web UI |
 
 If you don't want or need any of these services, just remove them from docker-compose.yml.
 With all these services combined, I believe you are well set-up for deploying your app stack.
