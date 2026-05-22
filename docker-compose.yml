@@ -497,6 +497,49 @@ services:
         - traefik.http.routers.opencode-https.tls.certresolver=le
         - traefik.http.services.opencode.loadbalancer.server.port=4096
 
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    command: gateway run
+    environment:
+      - HERMES_DASHBOARD=1
+      - HERMES_DASHBOARD_TUI=1
+      - API_SERVER_ENABLED=true
+      - API_SERVER_HOST=0.0.0.0
+      - API_SERVER_KEY=${HERMES_API_SERVER_KEY?Variable not set}
+      - API_SERVER_CORS_ORIGINS=*
+    volumes:
+      - type: bind
+        source: ${HERMES_DATA_PATH?Variable not set}
+        target: /opt/data
+    networks:
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.middlewares.hermes-auth.basicauth.users=${HERMES_USERNAME?Variable not set}:${HERMES_HASHED_PASSWORD?Variable not set}
+        - traefik.http.routers.hermes-http.rule=Host(`hermes.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.hermes-http.entrypoints=http
+        - traefik.http.routers.hermes-http.middlewares=https-redirect
+        - traefik.http.routers.hermes-https.rule=Host(`hermes.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.hermes-https.entrypoints=https
+        - traefik.http.routers.hermes-https.tls=true
+        - traefik.http.routers.hermes-https.tls.certresolver=le
+        - traefik.http.routers.hermes-https.middlewares=hermes-auth
+        - traefik.http.services.hermes.loadbalancer.server.port=9119
+        - traefik.http.routers.hermes-api-http.rule=Host(`hermes-api.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.hermes-api-http.entrypoints=http
+        - traefik.http.routers.hermes-api-http.middlewares=https-redirect
+        - traefik.http.routers.hermes-api-https.rule=Host(`hermes-api.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.hermes-api-https.entrypoints=https
+        - traefik.http.routers.hermes-api-https.tls=true
+        - traefik.http.routers.hermes-api-https.tls.certresolver=le
+        - traefik.http.services.hermes-api.loadbalancer.server.port=8642
+
 volumes:
   db-data:
     driver: local

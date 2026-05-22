@@ -37,6 +37,10 @@ jobs:
         envkey_OTEL_API_USER: ${{ secrets.OTEL_API_USER }}
         envkey_OTEL_API_HASH: ${{ secrets.OTEL_API_HASH }}
         envkey_OPENCODE_SERVER_PASSWORD: ${{ secrets.OPENCODE_SERVER_PASSWORD }}
+        envkey_HERMES_DATA_PATH: ${{ secrets.HERMES_DATA_PATH }}
+        envkey_HERMES_API_SERVER_KEY: ${{ secrets.HERMES_API_SERVER_KEY }}
+        envkey_HERMES_USERNAME: ${{ secrets.HERMES_USERNAME }}
+        envkey_HERMES_HASHED_PASSWORD: ${{ secrets.HERMES_HASHED_PASSWORD }}
         file_name: .env
 
     - name: Deploy to Docker swarm
