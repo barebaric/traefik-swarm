@@ -241,10 +241,10 @@ services:
       resources:
         limits:
           cpus: '0.10'
-          memory: 64M
+          memory: 128M
         reservations:
           cpus: '0.05'
-          memory: 32M
+          memory: 64M
 
   droppy:
     image: silverwind/droppy
