@@ -510,9 +510,7 @@ services:
       - API_SERVER_KEY=${HERMES_API_SERVER_KEY?Variable not set}
       - API_SERVER_CORS_ORIGINS=*
     volumes:
-      - type: bind
-        source: ${HERMES_DATA_PATH?Variable not set}
-        target: /opt/data
+      - hermes-data:/opt/data
     networks:
       - traefik-public
     deploy:
@@ -584,6 +582,9 @@ volumes:
     driver: local
 
   opencode-projects:
+    driver: local
+
+  hermes-data:
     driver: local
 
 networks:
