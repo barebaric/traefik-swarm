@@ -472,8 +472,9 @@ services:
 
   opencode:
     image: smanx/opencode:latest
-    command: ["web", "--hostname", "0.0.0.0", "--port", "4096"]
     environment:
+      - OPENCODE_HOSTNAME=0.0.0.0
+      - OPENCODE_PORT=4096
       - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD?Variable not set}
     volumes:
       - opencode-config:/root/.config/opencode
