@@ -152,7 +152,7 @@ services:
         - traefik.http.services.gateone.loadbalancer.server.scheme=https
 
   swarmpit:
-    image: swarmpit/swarmpit:latest
+    image: swarmpit/swarmpit:1.10
     environment:
       - SWARMPIT_DB=http://couchdb:5984
       - SWARMPIT_INFLUXDB=http://influxdb:8086
@@ -230,7 +230,6 @@ services:
       - DOCKER_API_VERSION=1.44
       - EVENT_ENDPOINT=http://swarmpit:8080/events
       - HEALTH_CHECK_ENDPOINT=http://swarmpit:8080/version
-      - DEBUG_STATS=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
