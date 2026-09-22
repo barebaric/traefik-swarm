@@ -500,7 +500,7 @@ services:
         - traefik.http.services.opencode.loadbalancer.server.port=4096
 
   hermes:
-    image: nousresearch/hermes-agent:latest
+    image: nousresearch/hermes-agent:v2026.9.21
     command: gateway run
     environment:
       - HERMES_DASHBOARD=1
