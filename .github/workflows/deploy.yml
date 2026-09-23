@@ -15,42 +15,85 @@ jobs:
 
     steps:
     - name: Checkout master
-      uses: actions/checkout@v2
-      
+      uses: actions/checkout@v5
+
     - name: Make envfile for Traefik
-      uses: knipknap/create-envfile@master
-      with:
-        envkey_TAG: ${{ github.sha }}
-        envkey_DOMAIN: ${{ secrets.DOMAIN }}
-        envkey_TRAEFIK_DASHBOARD_DOMAIN: ${{ secrets.TRAEFIK_DASHBOARD_DOMAIN }}
-        envkey_TRAEFIK_DASHBOARD_USERNAME: ${{ secrets.TRAEFIK_DASHBOARD_USERNAME }}
-        envkey_TRAEFIK_DASHBOARD_HASHED_PASSWORD: ${{ secrets.TRAEFIK_DASHBOARD_HASHED_PASSWORD }}
-        envkey_LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
-        envkey_REGISTRY_DOMAIN: ${{ secrets.REGISTRY_DOMAIN }}
-        envkey_REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-        envkey_REGISTRY_HASHED_PASSWORD: ${{ secrets.REGISTRY_HASHED_PASSWORD }}
-        envkey_DOH_ADMIN_PASSWORD: ${{ secrets.DOH_ADMIN_PASSWORD }}
-        envkey_KEYCLOAK_ADMIN_USERNAME: ${{ secrets.KEYCLOAK_ADMIN_USERNAME }}
-        envkey_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
-        envkey_UMAMI_DB_PASSWORD: ${{ secrets.UMAMI_DB_PASSWORD }}
-        envkey_UMAMI_APP_SECRET: ${{ secrets.UMAMI_APP_SECRET }}
-        envkey_OTEL_API_USER: ${{ secrets.OTEL_API_USER }}
-        envkey_OTEL_API_HASH: ${{ secrets.OTEL_API_HASH }}
-        envkey_OPENCODE_SERVER_PASSWORD: ${{ secrets.OPENCODE_SERVER_PASSWORD }}
-        envkey_HERMES_DATA_PATH: ${{ secrets.HERMES_DATA_PATH }}
-        envkey_HERMES_API_SERVER_KEY: ${{ secrets.HERMES_API_SERVER_KEY }}
-        envkey_HERMES_USERNAME: ${{ secrets.HERMES_USERNAME }}
-        envkey_HERMES_HASHED_PASSWORD: ${{ secrets.HERMES_HASHED_PASSWORD }}
-        file_name: .env
+      env:
+        ENVFILE_TAG: ${{ github.sha }}
+        ENVFILE_DOMAIN: ${{ secrets.DOMAIN }}
+        ENVFILE_TRAEFIK_DASHBOARD_DOMAIN: ${{ secrets.TRAEFIK_DASHBOARD_DOMAIN }}
+        ENVFILE_TRAEFIK_DASHBOARD_USERNAME: ${{ secrets.TRAEFIK_DASHBOARD_USERNAME }}
+        ENVFILE_TRAEFIK_DASHBOARD_HASHED_PASSWORD: ${{ secrets.TRAEFIK_DASHBOARD_HASHED_PASSWORD }}
+        ENVFILE_LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
+        ENVFILE_REGISTRY_DOMAIN: ${{ secrets.REGISTRY_DOMAIN }}
+        ENVFILE_REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        ENVFILE_REGISTRY_HASHED_PASSWORD: ${{ secrets.REGISTRY_HASHED_PASSWORD }}
+        ENVFILE_DOH_ADMIN_PASSWORD: ${{ secrets.DOH_ADMIN_PASSWORD }}
+        ENVFILE_KEYCLOAK_ADMIN_USERNAME: ${{ secrets.KEYCLOAK_ADMIN_USERNAME }}
+        ENVFILE_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+        ENVFILE_UMAMI_DB_PASSWORD: ${{ secrets.UMAMI_DB_PASSWORD }}
+        ENVFILE_UMAMI_APP_SECRET: ${{ secrets.UMAMI_APP_SECRET }}
+        ENVFILE_OTEL_API_USER: ${{ secrets.OTEL_API_USER }}
+        ENVFILE_OTEL_API_HASH: ${{ secrets.OTEL_API_HASH }}
+        ENVFILE_OPENCODE_SERVER_PASSWORD: ${{ secrets.OPENCODE_SERVER_PASSWORD }}
+        ENVFILE_HERMES_DATA_PATH: ${{ secrets.HERMES_DATA_PATH }}
+        ENVFILE_HERMES_API_SERVER_KEY: ${{ secrets.HERMES_API_SERVER_KEY }}
+        ENVFILE_HERMES_USERNAME: ${{ secrets.HERMES_USERNAME }}
+        ENVFILE_HERMES_HASHED_PASSWORD: ${{ secrets.HERMES_HASHED_PASSWORD }}
+      run: |
+        umask 077
+        # Write each ENVFILE_* var to .env as KEY=VALUE, minus the prefix.
+        for var in "${!ENVFILE_@}"; do
+          printf '%s=%s\n' "${var#ENVFILE_}" "${!var}"
+        done > .env
 
     - name: Deploy to Docker swarm
-      uses: knipknap/docker-swarm-deployment-action@master
-      with:
-        remote_docker_host: ${{ secrets.DOCKER_SSH_HOST }}
-        ssh_private_key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
-        ssh_public_key: ${{ secrets.DOCKER_SSH_PUBLIC_KEY }}
-        deploy_path: /home/github/deployment/myswarm
-        stack_file_name: docker-compose.yml
-        env_file_name: .env
-        keep_files: 5
-        args: myswarm
+      env:
+        SSH_HOST: ${{ secrets.DOCKER_SSH_HOST }}
+        SSH_PRIVATE_KEY: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        DEPLOY_PATH: /home/github/deployment/myswarm
+        STACK_FILE: docker-compose.yml
+        STACK_NAME: myswarm
+        KEEP_FILES: 5
+      run: |
+        set -euo pipefail
+
+        # --- SSH setup ------------------------------------------------------
+        SSH_DIR="$HOME/.ssh"
+        mkdir -p "$SSH_DIR"
+        printf '%s\n' "$SSH_PRIVATE_KEY" > "$SSH_DIR/id_rsa"
+        chmod 600 "$SSH_DIR/id_rsa"
+
+        # Single shared TCP connection for all commands (one handshake, reused
+        # for ssh and scp via ControlPath).
+        SSH_OPTS=(
+          -i "$SSH_DIR/id_rsa"
+          -o BatchMode=yes
+          -o IdentitiesOnly=yes
+          -o StrictHostKeyChecking=no
+          -o UserKnownHostsFile=/dev/null
+          -o LogLevel=ERROR
+          -o ConnectTimeout=15
+          -o ControlMaster=auto
+          -o "ControlPath=$SSH_DIR/cm-%r@%h-%p"
+          -o ControlPersist=300
+        )
+
+        run_ssh() { ssh "${SSH_OPTS[@]}" "$SSH_HOST" "$1"; }
+        put() { scp "${SSH_OPTS[@]}" "$1" "$SSH_HOST:$2"; }
+
+        # --- Deploy ---------------------------------------------------------
+        STAMP="$(date +%Y%m%d%H%M%S)"
+        REMOTE_STACK="$DEPLOY_PATH/stacks/docker-stack-$STAMP.yaml"
+
+        run_ssh "mkdir -p $DEPLOY_PATH/stacks $DEPLOY_PATH/build"
+        put "$STACK_FILE" "$REMOTE_STACK"
+        run_ssh "ls -t $DEPLOY_PATH/stacks/docker-stack-* 2>/dev/null | sed -e 1,$((KEEP_FILES + 1))d | xargs -r rm -- 2>/dev/null || true"
+        run_ssh "ln -nfs $REMOTE_STACK $DEPLOY_PATH/build/$STACK_FILE"
+        # Create build-context dirs referenced by the stack file (docker-compose config requires them to exist).
+        run_ssh "cd $DEPLOY_PATH/build && egrep '    (context:|build)' < $STACK_FILE | sed -E 's/\s+\S+:\s*//' | xargs mkdir -p ."
+        put ".env" "$DEPLOY_PATH/build/.env"
+        run_ssh "cd $DEPLOY_PATH/build && chmod 600 .env && docker-compose -f $STACK_FILE config 2>/dev/null | docker stack deploy --with-registry-auth -c - $STACK_NAME"
+
+        ssh "${SSH_OPTS[@]}" -O exit "$SSH_HOST" 2>/dev/null || true
+        echo "Deployed stack '$STACK_NAME' ($STAMP)."
