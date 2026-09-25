@@ -544,9 +544,13 @@ services:
   # overlay-internal.
   frps:
     image: snowdreamtech/frps:0.71.0-alpine
-    command:
+    # The image entrypoint ignores any command (KEEPALIVE=1) and backgrounds
+    # frps with its stock token-less config, so override the entrypoint and
+    # write the real config from $FRPS_TOKEN ourselves.
+    entrypoint:
       - sh
       - -c
+    command:
       - |
         cat > /etc/frp/frps.toml <<EOF
         bindAddr = "0.0.0.0"
