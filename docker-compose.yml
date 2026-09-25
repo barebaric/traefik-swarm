@@ -537,6 +537,35 @@ services:
         - traefik.http.routers.hermes-api-https.tls.certresolver=le
         - traefik.http.services.hermes-api.loadbalancer.server.port=8642
 
+  # frps: server side of a reverse tunnel to the maintainer's local PC, which has
+  # no inbound ports. The PC runs frpc outbound to :7000 (TLS + token auth) and
+  # exposes its loopback OpenAI endpoint as http://frps:1919 on traefik-public
+  # for the hermes service. Only the frp auth port 7000 is published; 1919 stays
+  # overlay-internal.
+  frps:
+    image: snowdreamtech/frps:0.71.0-alpine
+    command:
+      - sh
+      - -c
+      - |
+        cat > /etc/frp/frps.toml <<EOF
+        bindAddr = "0.0.0.0"
+        bindPort = 7000
+        auth.token = "$$FRPS_TOKEN"
+        transport.tls.force = true
+        EOF
+        exec /usr/bin/frps -c /etc/frp/frps.toml
+    environment:
+      - FRPS_TOKEN=${FRPS_TOKEN?Variable not set}
+    networks:
+      - traefik-public
+    ports:
+      - "7000:7000"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
 volumes:
   db-data:
     driver: local
