@@ -25,6 +25,8 @@ What you'll have when you are done:
 | https://&#8203;droppy.yourdomain.com | [Droppy](https://github.com/silverwind/droppy) | File storage server with a web interface
 | https://&#8203;web.yourdomain.com | [nginx](https://www.nginx.com/) | Webserver to serve public files uploaded using Droppy
 | https://&#8203;opencode.yourdomain.com | [OpenCode](https://opencode.ai) | AI coding agent with web UI |
+| https://&#8203;hermes.yourdomain.com | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | AI agent with web dashboard, using a local LLM through the frp tunnel below |
+| - | [frp server](https://github.com/fatedier/frp) | Reverse tunnel endpoint for exposing the maintainer's local LLM endpoint to the swarm |
 
 If you don't want or need any of these services, just remove them from docker-compose.yml.
 With all these services combined, I believe you are well set-up for deploying your app stack.
@@ -207,6 +209,70 @@ bXlwYXNzd29yZA==          # This is the base64 encoded password, e.g. `echo -n '
 > DKIM** (including setting the appropriate DNS records), and you will need a **dedicated IP address with a PTR record**. You cannot
 > set this PTR record in your own DNS records and will need to ask your IP address provider to do that for you.
 > It is almost always easier and safer to ask your hosting provider if they already provide an SMTP service for their customers.
+
+## Expose a local LLM endpoint to the swarm (frp tunnel)
+
+The `hermes` service in the swarm is configured to use an OpenAI-compatible LLM endpoint that runs on a local PC
+which has no open ports towards the internet. The connection is made with an frp reverse tunnel:
+
+- The swarm runs `frps` (server), attached to the `traefik-public` overlay network. It publishes only the
+  authenticated frp port **7000** (TLS is enforced).
+- The PC runs `frpc` (client) as an outbound docker container. It dials port 7000 and exposes the PC's local
+  endpoint (loopback only) as **http://frps:1919** on the `traefik-public` overlay network.
+- Port 1919 is never published to the host: only containers on the overlay network can reach it.
+
+### Configuration
+
+Store a shared secret in Github Secrets (or set it through an environment variable in the docker-compose file):
+
+```bash
+FRPS_TOKEN=<random string, e.g. from `openssl rand -hex 24`>
+```
+
+The same token goes into the PC's `~/.config/frpc/frpc.toml`:
+
+```toml
+serverAddr = "mydomain.com"
+serverPort = 7000
+auth.token = "<FRPS_TOKEN>"
+transport.tls.enable = true
+
+[[proxies]]
+name = "local-llm"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 1919
+remotePort = 1919
+```
+
+Run the client on the PC as a docker container (restarts and reconnects automatically):
+
+```bash
+docker run -d --name frpc --restart unless-stopped --network host \
+  -v ~/.config/frpc/frpc.toml:/etc/frp/frpc.toml:ro \
+  snowdreamtech/frpc:0.71.0-alpine
+```
+
+### Point hermes at the endpoint
+
+Hermes reads its model configuration from `/opt/data/config.yaml` (inside the `hermes-data` volume). Set it via
+`docker exec -it <hermes-container> hermes model` (choose "Custom endpoint"), or edit the file directly:
+
+```yaml
+model:
+  provider: custom
+  model: <model name from the endpoint's /v1/models>
+  base_url: http://frps:1919/v1
+  api_key: "none"
+```
+
+Then restart the service so the gateway picks it up: `docker service update --force myswarm_hermes`.
+
+> **Note**
+> Whenever the PC is offline or asleep, hermes has no model available.
+>
+> The `frps` image (`snowdreamtech/frps`) sets `KEEPALIVE=1`, so its default entrypoint ignores the container
+> command — that is why the stack overrides the entrypoint to write the config from `$FRPS_TOKEN` itself.
 
 ## Bring the whole stack online
 
