@@ -219,8 +219,8 @@ which has no open ports towards the internet. The connection is made with an frp
   authenticated frp port **7000** (TLS is enforced).
 - The PC runs `frpc` (client) as an outbound docker container. It dials port 7000 and exposes local endpoints
   (loopback only) on the `traefik-public` overlay network — a single `frpc` container can carry any number of
-  endpoints via multiple `[[proxies]]` blocks. Currently: FreeToken as **http://frps:1919** and LM Studio as
-  **http://frps:1234**.
+  endpoints via multiple `[[proxies]]` blocks. Currently: FreeToken as **http://frps:1919**, LM Studio as
+  **http://frps:1234**, and [chrome-relay](https://github.com/kiluazen/chrome-relay) as **http://frps:12122**.
 - The proxied ports are never published to the host: only containers on the overlay network can reach them.
 
 ### Configuration
@@ -252,7 +252,27 @@ type = "tcp"
 localIP = "127.0.0.1"
 localPort = 1234
 remotePort = 1234
+
+[[proxies]]
+name = "chrome-relay"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 12122
+remotePort = 12122
 ```
+
+### chrome-relay
+
+[chrome-relay](https://github.com/kiluazen/chrome-relay) lets an agent control the PC's real, logged-in Chrome
+(read pages, click, fill forms). Install it on the PC with `npm add -g chrome-relay && chrome-relay install`,
+then load its extension from the Chrome Web Store. Its local HTTP bridge listens on `127.0.0.1:12122` with two
+routes: `GET /ping` and `POST /call` with `{"name": "<tool>", "args": {...}}` (e.g. `get_windows_and_tabs`,
+`chrome_navigate`, `chrome_read_page`, `chrome_click_element`).
+
+> **Warning**
+> The chrome-relay API has no authentication, and through the tunnel it is reachable by every container on the
+> `traefik-public` network — including hermes. Anything that can reach `frps:12122` can drive the logged-in
+> browser session on the PC.
 
 Run the client on the PC as a docker container (restarts and reconnects automatically):
 
