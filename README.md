@@ -217,9 +217,11 @@ which has no open ports towards the internet. The connection is made with an frp
 
 - The swarm runs `frps` (server), attached to the `traefik-public` overlay network. It publishes only the
   authenticated frp port **7000** (TLS is enforced).
-- The PC runs `frpc` (client) as an outbound docker container. It dials port 7000 and exposes the PC's local
-  endpoint (loopback only) as **http://frps:1919** on the `traefik-public` overlay network.
-- Port 1919 is never published to the host: only containers on the overlay network can reach it.
+- The PC runs `frpc` (client) as an outbound docker container. It dials port 7000 and exposes local endpoints
+  (loopback only) on the `traefik-public` overlay network — a single `frpc` container can carry any number of
+  endpoints via multiple `[[proxies]]` blocks. Currently: FreeToken as **http://frps:1919** and LM Studio as
+  **http://frps:1234**.
+- The proxied ports are never published to the host: only containers on the overlay network can reach them.
 
 ### Configuration
 
@@ -238,11 +240,18 @@ auth.token = "<FRPS_TOKEN>"
 transport.tls.enable = true
 
 [[proxies]]
-name = "local-llm"
+name = "freetoken"
 type = "tcp"
 localIP = "127.0.0.1"
 localPort = 1919
 remotePort = 1919
+
+[[proxies]]
+name = "lmstudio"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 1234
+remotePort = 1234
 ```
 
 Run the client on the PC as a docker container (restarts and reconnects automatically):
