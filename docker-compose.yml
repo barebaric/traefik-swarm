@@ -3,20 +3,10 @@ services:
   traefik:
     # Use the latest Traefik image
     image: traefik:2.11
-    # 80/443 in host mode (instead of the routing mesh) so Traefik sees
-    # the real client IP; the ingress mesh NATs every client to the
-    # gateway IP, which collapses analytics sessions. The remaining
-    # ports keep working through the mesh.
     ports:
       - "25:25"
-      - target: 80
-        published: 80
-        protocol: tcp
-        mode: host
-      - target: 443
-        published: 443
-        protocol: tcp
-        mode: host
+      - "80:80"
+      - "443:443"
       - "587:587"
       - "1443:1443" # Port for DNS over HTTPS
       - "5000:5000"
