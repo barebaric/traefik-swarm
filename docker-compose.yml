@@ -390,8 +390,8 @@ services:
         # allows private networks by default. Public DoH clients must
         # not carry their real IP, or they get REFUSED answers.
         - traefik.http.routers.doh-https.middlewares=doh-strip-client-ip
-        - traefik.http.middlewares.doh-strip-client-ip.customRequestHeaders.X-Real-IP=
-        - traefik.http.middlewares.doh-strip-client-ip.customRequestHeaders.X-Forwarded-For=
+        - traefik.http.middlewares.doh-strip-client-ip.headers.customrequestheaders.X-Real-IP=
+        - traefik.http.middlewares.doh-strip-client-ip.headers.customrequestheaders.X-Forwarded-For=
         - traefik.http.services.doh-dns.loadbalancer.server.port=80
 
   # Docker-GC - Automatic Docker Garbage Collection
