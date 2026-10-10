@@ -90,14 +90,24 @@ services:
       - default
 
   registry:
-    image: registry:2.8.3
-    volumes:
-      - docker-registry:/var/lib/registry
+    # Thin forwarder: the actual registry runs as a VM in the maintainer's
+    # home lab and is reached through a wireguard site-to-site tunnel. The
+    # backend address comes from Github Secrets, so this public repository
+    # contains no private addresses.
+    image: alpine/socat:latest
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - |
+        exec socat tcp-listen:5000,fork,reuseaddr \
+          tcp-connect:$${REGISTRY_BACKEND_HOST:?}:$${REGISTRY_BACKEND_PORT:?}
+    environment:
+      - REGISTRY_BACKEND_HOST=${REGISTRY_BACKEND_HOST?Variable not set}
+      - REGISTRY_BACKEND_PORT=${REGISTRY_BACKEND_PORT?Variable not set}
     networks:
       - traefik-public
       - registry
-    environment:
-      - REGISTRY_STORAGE_DELETE_ENABLED=true
     deploy:
       mode: 'global'
       labels:
@@ -599,9 +609,6 @@ volumes:
   # manager node, see above.
   traefik-public-certificates:
     driver: local
-
-  docker-registry:
-    external: true
 
   droppy:
     external: true
