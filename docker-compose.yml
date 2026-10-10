@@ -298,49 +298,6 @@ services:
           cpus: '0.05'
           memory: 64M
 
-  droppy:
-    image: silverwind/droppy
-    volumes:
-      - droppy:/files
-    networks:
-      - traefik-public
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.droppy-http.rule=Host(`droppy.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.droppy-http.entrypoints=http
-        - traefik.http.routers.droppy-http.middlewares=https-redirect
-        - traefik.http.routers.droppy-https.rule=Host(`droppy.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.droppy-https.entrypoints=https
-        - traefik.http.routers.droppy-https.tls=true
-        - traefik.http.routers.droppy-https.tls.certresolver=le
-        - traefik.http.services.droppy.loadbalancer.server.port=8989
-
-  webserver:
-    image: nginx:latest
-    volumes:
-      - droppy-public:/usr/share/nginx/html:ro
-    deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.traefik-public-http.rule=Host(`web.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.traefik-public-http.entrypoints=http
-        - traefik.http.routers.traefik-public-http.middlewares=https-redirect
-        - traefik.http.routers.traefik-public-https.rule=Host(`web.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.traefik-public-https.entrypoints=https
-        - traefik.http.routers.traefik-public-https.tls=true
-        - traefik.http.routers.traefik-public-https.tls.certresolver=le
-        - traefik.http.services.traefik-public.loadbalancer.server.port=80
-    networks:
-      - traefik-public
-
   sso-mariadb:
     image: mariadb:11
     volumes:
@@ -642,12 +599,6 @@ volumes:
   # manager node, see above.
   traefik-public-certificates:
     driver: local
-
-  droppy:
-    external: true
-
-  droppy-public:
-    external: true
 
   sso-mysql-data:
     driver: local
