@@ -22,8 +22,6 @@ What you'll have when you are done:
 | https://&#8203;swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
 | https://&#8203;keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
 | https://&#8203;gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
-| https://&#8203;droppy.yourdomain.com | [Droppy](https://github.com/silverwind/droppy) | File storage server with a web interface
-| https://&#8203;web.yourdomain.com | [nginx](https://www.nginx.com/) | Webserver to serve public files uploaded using Droppy
 | https://&#8203;opencode.yourdomain.com | [OpenCode](https://opencode.ai) | AI coding agent with web UI |
 | https://&#8203;hermes.yourdomain.com | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | AI agent with web dashboard, using a local LLM through the frp tunnel below |
 | - | [frp server](https://github.com/fatedier/frp) | Reverse tunnel endpoint for exposing the maintainer's local LLM endpoint to the swarm |
