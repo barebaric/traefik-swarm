@@ -238,6 +238,10 @@ serverAddr = "mydomain.com"
 serverPort = 7000
 auth.token = "<FRPS_TOKEN>"
 transport.tls.enable = true
+# Without this, one transient DNS failure at startup (e.g. systemd-resolved not
+# ready yet) makes frpc exit for good — the container then looks "Up" (the image's
+# keepalive wrapper) but no proxy is registered on frps.
+loginFailExit = false
 
 [[proxies]]
 name = "freetoken"

@@ -111,12 +111,12 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.tcp.routers.myswarm-edge.rule=HostSNI(`[REDACTED]`)
+        - traefik.tcp.routers.myswarm-edge.rule=${EDGE_TLS_RULE?Variable not set}
         - traefik.tcp.routers.myswarm-edge.entrypoints=https
         - traefik.tcp.routers.myswarm-edge.tls.passthrough=true
         - traefik.tcp.routers.myswarm-edge.service=myswarm-edge
         - traefik.tcp.services.myswarm-edge.loadbalancer.server.port=443
-        - traefik.http.routers.myswarm-edge-http.rule=Host(`[REDACTED]`)
+        - traefik.http.routers.myswarm-edge-http.rule=Host(`${EDGE_HTTP_HOST?Variable not set}`)
         - traefik.http.routers.myswarm-edge-http.entrypoints=http
         - traefik.http.routers.myswarm-edge-http.middlewares=https-redirect
         - traefik.http.routers.myswarm-edge-http.service=myswarm-edge-http
