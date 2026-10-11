@@ -89,10 +89,10 @@ services:
       - traefik-public
       - default
 
-  # Edge forwarder: TLS for migrated myswarm hostnames is passed through
-  # (SNI) to the home lab's k3s traefik, which owns routing + certificates
-  # for them. Extend HostSNI with each hostname as its stack migrates.
-  # Barebaric keeps terminating everything not listed here (e.g. [REDACTED]).
+  # Edge forwarder: TLS for migrated hostnames is passed through (SNI)
+  # to an external backend cluster, which owns routing + certificates for
+  # them. Extend the EDGE_TLS_RULE secret with each hostname as its stack
+  # migrates. Everything not listed keeps terminating here.
   myswarm-edge:
     image: alpine/socat:latest
     entrypoint:
@@ -100,9 +100,13 @@ services:
       - -c
     command:
       - |
-        exec socat tcp-listen:443,fork,reuseaddr tcp-connect:$${EDGE_BACKEND_HOST:?}:443
+        socat tcp-listen:443,fork,reuseaddr tcp-connect:$${EDGE_BACKEND_HOST:?}:443 &
+        exec socat tcp-listen:5000,fork,reuseaddr \
+          tcp-connect:$${REGISTRY_BACKEND_HOST:?}:$${REGISTRY_BACKEND_PORT:?}
     environment:
       - EDGE_BACKEND_HOST=${EDGE_BACKEND_HOST?Variable not set}
+      - REGISTRY_BACKEND_HOST=${REGISTRY_BACKEND_HOST?Variable not set}
+      - REGISTRY_BACKEND_PORT=${REGISTRY_BACKEND_PORT?Variable not set}
     networks:
       - traefik-public
     deploy:
@@ -120,6 +124,18 @@ services:
         - traefik.http.routers.myswarm-edge-http.middlewares=https-redirect
         - traefik.http.routers.myswarm-edge-http.service=myswarm-edge-http
         - traefik.http.services.myswarm-edge-http.loadbalancer.server.port=443
+        - traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME}:${REGISTRY_HASHED_PASSWORD}
+        - traefik.http.routers.registry-https.rule=Host(`${REGISTRY_DOMAIN?Variable not set}`)
+        - traefik.http.routers.registry-https.entrypoints=https5000
+        - traefik.http.routers.registry-https.tls=true
+        - traefik.http.routers.registry-https.tls.certresolver=le
+        - traefik.http.routers.registry-https.middlewares=registry-auth
+        - traefik.http.routers.registry-https.service=registry
+        - traefik.http.services.registry.loadbalancer.server.port=5000
+        - traefik.http.routers.registry-http.rule=Host(`${REGISTRY_DOMAIN?Variable not set}`)
+        - traefik.http.routers.registry-http.entrypoints=http
+        - traefik.http.routers.registry-http.middlewares=https5000-redirect
+        - traefik.http.routers.registry-http.service=registry
 
   # ACME HTTP-01 for the home lab's edge: Let's Encrypt validates over
   # port 80 (TLS-ALPN is not passable through a traefik edge - it
@@ -148,42 +164,6 @@ services:
         - traefik.http.routers.myswarm-edge-acme.priority=2000
         - traefik.http.routers.myswarm-edge-acme.service=myswarm-edge-acme
         - traefik.http.services.myswarm-edge-acme.loadbalancer.server.port=8080
-
-  registry:
-    # Thin forwarder: the actual registry runs as a VM in the maintainer's
-    # home lab and is reached through a wireguard site-to-site tunnel. The
-    # backend address comes from Github Secrets, so this public repository
-    # contains no private addresses.
-    image: alpine/socat:latest
-    entrypoint:
-      - sh
-      - -c
-    command:
-      - |
-        exec socat tcp-listen:5000,fork,reuseaddr \
-          tcp-connect:$${REGISTRY_BACKEND_HOST:?}:$${REGISTRY_BACKEND_PORT:?}
-    environment:
-      - REGISTRY_BACKEND_HOST=${REGISTRY_BACKEND_HOST?Variable not set}
-      - REGISTRY_BACKEND_PORT=${REGISTRY_BACKEND_PORT?Variable not set}
-    networks:
-      - traefik-public
-      - registry
-    deploy:
-      mode: 'global'
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME}:${REGISTRY_HASHED_PASSWORD}
-        - traefik.http.routers.registry-http.rule=Host(`${REGISTRY_DOMAIN?Variable not set}`)
-        - traefik.http.routers.registry-http.entrypoints=http
-        - traefik.http.routers.registry-http.middlewares=https5000-redirect
-        - traefik.http.routers.registry-https.rule=Host(`${REGISTRY_DOMAIN?Variable not set}`)
-        - traefik.http.routers.registry-https.entrypoints=https5000
-        - traefik.http.routers.registry-https.tls=true
-        - traefik.http.routers.registry-https.tls.certresolver=le
-        - traefik.http.routers.registry-https.middlewares=registry-auth
-        - traefik.http.services.registry.loadbalancer.server.port=5000
 
   gateone:
     image: dezota/gateone
@@ -528,8 +508,6 @@ networks:
   traefik-public:
     external: true
 
-  registry:
-    driver: overlay
   
   net:
     driver: overlay
