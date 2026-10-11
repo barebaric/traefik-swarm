@@ -22,8 +22,6 @@ What you'll have when you are done:
 | https://&#8203;swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
 | https://&#8203;keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
 | https://&#8203;gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
-| https://&#8203;opencode.yourdomain.com | [OpenCode](https://opencode.ai) | AI coding agent with web UI |
-| https://&#8203;hermes.yourdomain.com | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | AI agent with web dashboard, using a local LLM through the frp tunnel below |
 | - | [frp server](https://github.com/fatedier/frp) | Reverse tunnel endpoint for exposing the maintainer's local LLM endpoint to the swarm |
 
 If you don't want or need any of these services, just remove them from docker-compose.yml.
@@ -210,8 +208,8 @@ bXlwYXNzd29yZA==          # This is the base64 encoded password, e.g. `echo -n '
 
 ## Expose a local LLM endpoint to the swarm (frp tunnel)
 
-The `hermes` service in the swarm is configured to use an OpenAI-compatible LLM endpoint that runs on a local PC
-which has no open ports towards the internet. The connection is made with an frp reverse tunnel:
+Services can use OpenAI-compatible LLM endpoints (and other local endpoints) that run on a local PC with
+no open ports towards the internet. The connection is made with an frp reverse tunnel:
 
 - The swarm runs `frps` (server), attached to the `traefik-public` overlay network. It publishes only the
   authenticated frp port **7000** (TLS is enforced).
@@ -273,7 +271,7 @@ routes: `GET /ping` and `POST /call` with `{"name": "<tool>", "args": {...}}` (e
 
 > **Warning**
 > The chrome-relay API has no authentication, and through the tunnel it is reachable by every container on the
-> `traefik-public` network — including hermes. Anything that can reach `frps:12122` can drive the logged-in
+> `traefik-public` network. Anything that can reach `frps:12122` can drive the logged-in
 > browser session on the PC.
 
 Run the client on the PC as a docker container (restarts and reconnects automatically):
@@ -284,23 +282,8 @@ docker run -d --name frpc --restart unless-stopped --network host \
   snowdreamtech/frpc:0.71.0-alpine
 ```
 
-### Point hermes at the endpoint
-
-Hermes reads its model configuration from `/opt/data/config.yaml` (inside the `hermes-data` volume). Set it via
-`docker exec -it <hermes-container> hermes model` (choose "Custom endpoint"), or edit the file directly:
-
-```yaml
-model:
-  provider: custom
-  model: <model name from the endpoint's /v1/models>
-  base_url: http://frps:1919/v1
-  api_key: "none"
-```
-
-Then restart the service so the gateway picks it up: `docker service update --force myswarm_hermes`.
-
 > **Note**
-> Whenever the PC is offline or asleep, hermes has no model available.
+> When the PC is offline or asleep, the tunneled endpoints are unavailable.
 >
 > The `frps` image (`snowdreamtech/frps`) sets `KEEPALIVE=1`, so its default entrypoint ignores the container
 > command — that is why the stack overrides the entrypoint to write the config from `$FRPS_TOKEN` itself.
