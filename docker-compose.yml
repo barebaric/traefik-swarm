@@ -100,8 +100,7 @@ services:
       - -c
     command:
       - |
-        exec socat tcp-listen:443,fork,reuseaddr \
-          tcp-connect:$${EDGE_BACKEND_HOST:?}:443
+        exec socat tcp-listen:443,fork,reuseaddr tcp-connect:$${EDGE_BACKEND_HOST:?}:443
     environment:
       - EDGE_BACKEND_HOST=${EDGE_BACKEND_HOST?Variable not set}
     networks:
@@ -121,6 +120,34 @@ services:
         - traefik.http.routers.myswarm-edge-http.middlewares=https-redirect
         - traefik.http.routers.myswarm-edge-http.service=myswarm-edge-http
         - traefik.http.services.myswarm-edge-http.loadbalancer.server.port=443
+
+  # ACME HTTP-01 for the home lab's edge: Let's Encrypt validates over
+  # port 80 (TLS-ALPN is not passable through a traefik edge - it
+  # hijacks the acme-tls/1 ALPN). High-priority path rule so it wins
+  # over host-based redirects for all migrated domains.
+  myswarm-edge-acme:
+    image: alpine/socat:latest
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - |
+        exec socat tcp-listen:8080,fork,reuseaddr \
+          tcp-connect:$${EDGE_BACKEND_HOST:?}:80
+    environment:
+      - EDGE_BACKEND_HOST=${EDGE_BACKEND_HOST?Variable not set}
+    networks:
+      - traefik-public
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.myswarm-edge-acme.rule=PathPrefix(`/.well-known/acme-challenge`)
+        - traefik.http.routers.myswarm-edge-acme.entrypoints=http
+        - traefik.http.routers.myswarm-edge-acme.priority=2000
+        - traefik.http.routers.myswarm-edge-acme.service=myswarm-edge-acme
+        - traefik.http.services.myswarm-edge-acme.loadbalancer.server.port=8080
 
   registry:
     # Thin forwarder: the actual registry runs as a VM in the maintainer's
