@@ -185,31 +185,6 @@ services:
         - traefik.http.routers.registry-https.middlewares=registry-auth
         - traefik.http.services.registry.loadbalancer.server.port=5000
 
-  registry-ui:
-    image: joxit/docker-registry-ui:2.5.7
-    environment:
-      - DELETE_IMAGES=true
-      - REGISTRY_TITLE=My Docker Registry
-      - NGINX_PROXY_PASS_URL=http://registry:5000
-      - SINGLE_REGISTRY=true
-    networks:
-      - traefik-public
-      - registry
-    deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.registry-ui-http.rule=Host(`registry.${DOMAIN}`)
-        - traefik.http.routers.registry-ui-http.entrypoints=http
-        - traefik.http.routers.registry-ui-http.middlewares=https-redirect
-        - traefik.http.routers.registry-ui-https.rule=Host(`registry.${DOMAIN}`)
-        - traefik.http.routers.registry-ui-https.entrypoints=https
-        - traefik.http.routers.registry-ui-https.tls=true
-        - traefik.http.routers.registry-ui-https.tls.certresolver=le
-        - traefik.http.routers.registry-ui-https.middlewares=registry-auth
-        - traefik.http.services.registry-ui.loadbalancer.server.port=80
-
   gateone:
     image: dezota/gateone
     networks:
@@ -325,63 +300,6 @@ services:
           cpus: '0.05'
           memory: 64M
 
-  sso-mariadb:
-    image: mariadb:11
-    volumes:
-      - sso-mysql-data:/var/lib/mysql
-    networks:
-      - sso
-    environment:
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: keycloak
-      MARIADB_USER: keycloak
-      MARIADB_PASSWORD: keycloak-db-password
-      MARIADB_AUTO_UPGRADE: 1
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0
-    environment:
-      - KC_DB=mariadb
-      - KC_DB_URL_HOST=sso-mariadb
-      - KC_DB_URL_DATABASE=keycloak
-      - KC_DB_URL_PORT=3306
-      - KC_DB_USERNAME=keycloak
-      - KC_DB_PASSWORD=keycloak-db-password
-      - KC_HOSTNAME=sso.${DOMAIN?Variable not set}
-      - KC_PROXY=edge
-      - KC_HEALTH_ENABLED=true
-      - KC_METRICS_ENABLED=true
-      - KC_LOG_LEVEL=info
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USERNAME?Variable not set}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD?Variable not set}
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
-#      interval: 15s
-#      timeout: 2s
-#      retries: 15
-    command: start
-    networks:
-      - sso
-      - traefik-public
-    depends_on:
-      - sso-mariadb
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.keycloak-http.rule=Host(`sso.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.keycloak-http.entrypoints=http
-        - traefik.http.routers.keycloak-http.middlewares=https-redirect
-        - traefik.http.routers.keycloak-https.rule=Host(`sso.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.keycloak-https.entrypoints=https
-        - traefik.http.routers.keycloak-https.tls=true
-        - traefik.http.routers.keycloak-https.tls.certresolver=le
-        - traefik.http.services.keycloak.loadbalancer.server.port=8080
-
   doh:
     image: technitium/dns-server:latest
     hostname: dns-server
@@ -438,49 +356,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-
-  umami-db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD}
-    volumes:
-      - umami-db-data:/var/lib/postgresql/data
-    networks:
-      - umami
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-
-  umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
-    environment:
-      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD}@umami-db:5432/umami
-      APP_SECRET: ${UMAMI_APP_SECRET}
-      DISABLE_TELEMETRY: "1"
-    networks:
-      - umami
-      - traefik-public
-    depends_on:
-      - umami-db
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.umami-http.rule=Host(`analytics.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.umami-http.entrypoints=http
-        - traefik.http.routers.umami-http.middlewares=https-redirect
-        - traefik.http.routers.umami-https.rule=Host(`analytics.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.umami-https.entrypoints=https
-        - traefik.http.routers.umami-https.tls=true
-        - traefik.http.routers.umami-https.tls.certresolver=le
-        - traefik.http.services.umami.loadbalancer.server.port=3000
 
   victoria-metrics:
     image: victoriametrics/victoria-metrics:latest
@@ -627,14 +502,10 @@ volumes:
   traefik-public-certificates:
     driver: local
 
-  sso-mysql-data:
-    driver: local
   
   doh-config:
     driver: local
 
-  umami-db-data:
-    driver: local
 
   victoria-data:
     driver: local
