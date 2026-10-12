@@ -21,6 +21,7 @@ What you'll have when you are done:
 | https://&#8203;traefik.yourdomain.com | [Traefik](https://github.com/containous/traefik/) | The automatic reverse proxy, including its admin UI. [Lets Encrypt](https://letsencrypt.org/) will automatically create SSL certificates for you
 | https://&#8203;swarmpit.yourdomain.com | [Swarmpit](https://github.com/swarmpit/swarmpit) | Manage your swarm and monitor resources (using influxdb)
 | https://&#8203;keycloak.yourdomain.com | [Keycloak](https://github.com/keycloak/keycloak) | SSO server
+| https://&#8203;analytics.yourdomain.com | [Umami](https://umami.is/) | Privacy-friendly web analytics, backed by its own PostgreSQL
 | https://&#8203;gateone.yourdomain.com | [GateOne](https://github.com/liftoff/GateOne) | An HTTPS based SSH client
 | - | [frp server](https://github.com/fatedier/frp) | Reverse tunnel endpoint for exposing the maintainer's local LLM endpoint to the swarm |
 
