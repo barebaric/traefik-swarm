@@ -119,7 +119,9 @@ services:
         - traefik.tcp.routers.myswarm-edge.tls.passthrough=true
         - traefik.tcp.routers.myswarm-edge.service=myswarm-edge
         - traefik.tcp.services.myswarm-edge.loadbalancer.server.port=443
-        - traefik.http.routers.myswarm-edge-http.rule=Host(`${EDGE_HTTP_HOST?Variable not set}`)
+        # Raw like EDGE_TLS_RULE so the secret can carry a multi-host
+        # rule (Host(`a`) || Host(`b`) || ...), not just one hostname.
+        - traefik.http.routers.myswarm-edge-http.rule=${EDGE_HTTP_HOST?Variable not set}
         - traefik.http.routers.myswarm-edge-http.entrypoints=http
         - traefik.http.routers.myswarm-edge-http.middlewares=https-redirect
         - traefik.http.routers.myswarm-edge-http.service=myswarm-edge-http
