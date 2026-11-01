@@ -387,6 +387,10 @@ services:
     command:
       - "--retentionPeriod=12M"
       - "--httpListenAddr=:8428"
+      # VM would answer every request with "Access-Control-Allow-Origin: *",
+      # which would bypass the metrics-cors origin list below. The vmui is
+      # same-origin and unaffected.
+      - "--http.disableCORS"
     volumes:
       - victoria-data:/victoria-metrics-data
     networks:
@@ -408,6 +412,28 @@ services:
         - traefik.http.routers.vm-https.tls=true
         - traefik.http.routers.vm-https.tls.certresolver=le
         - traefik.http.routers.vm-https.middlewares=metrics-auth
+        # Public read-only endpoint for a single download-stats query,
+        # consumed by a website that fetches it from the browser. Only
+        # requests whose query parameter is exactly the expression below
+        # are served without basic auth; every other path or query on
+        # this host keeps requiring it (vm-https router, which this rule
+        # outranks by length). The CORS middleware restricts browser
+        # access to the origins in STATS_CORS_ORIGINS (comma-separated),
+        # the rate limit protects the unauthenticated route. When
+        # changing the query here, change it in the consuming site as
+        # well.
+        - traefik.http.middlewares.metrics-cors.headers.accesscontrolalloworiginlist=${STATS_CORS_ORIGINS?Variable not set}
+        - traefik.http.middlewares.metrics-cors.headers.accesscontrolallowmethods=GET,OPTIONS
+        - traefik.http.middlewares.metrics-cors.headers.accesscontrolmaxage=100
+        - traefik.http.middlewares.metrics-cors.headers.addvaryheader=true
+        - traefik.http.middlewares.metrics-ratelimit.ratelimit.average=10
+        - traefik.http.middlewares.metrics-ratelimit.ratelimit.period=1m
+        - traefik.http.middlewares.metrics-ratelimit.ratelimit.burst=20
+        - traefik.http.routers.vm-stats-https.rule=Host(`metrics.${DOMAIN?Variable not set}`) && Path(`/api/v1/query`) && (Method(`GET`) || Method(`OPTIONS`)) && Query(`query`, `sum(increase(downloads_total[30d]))`)
+        - traefik.http.routers.vm-stats-https.entrypoints=https
+        - traefik.http.routers.vm-stats-https.tls=true
+        - traefik.http.routers.vm-stats-https.tls.certresolver=le
+        - traefik.http.routers.vm-stats-https.middlewares=metrics-ratelimit,metrics-cors
         - traefik.http.services.victoria-metrics.loadbalancer.server.port=8428
 
   # frps: server side of a reverse tunnel to a local PC, which has no
